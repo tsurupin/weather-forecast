@@ -1,5 +1,6 @@
 from flask import Flask
-
+from cassandra.cluster import Cluster
+cluster = Cluster()
 
 app = Flask(__name__)
 

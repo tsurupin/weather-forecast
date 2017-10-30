@@ -2,15 +2,27 @@ version: '2.0'
 
 
 services:
+  cassandra:
+    image: cassandra
+    ports:
+      - "9042:9042"
+  kafka:
+    image: wurstmeister/kafka
+
   app:
     depends_on:
-      - db
-    build: "./app"
+      - cassandra
+      - kafka
+    build: "./web"
     links:
-      - db
-  db:
-    image: cassandra
-    environment:
-      CASSANDRA_LISTEN_ADDRESS:
-    ports:
-    volumes:   
+      - cassandra
+      - kafka
+
+  spark:
+    image: jupyter/pyspark-notebook
+    depends_on:
+      - cassandra
+      - kafka
+    links:
+      - cassandra
+      - kafka
