@@ -1,0 +1,16 @@
+version: '2.0'
+
+
+services:
+  app:
+    depends_on:
+      - db
+    build: "./app"
+    links:
+      - db
+  db:
+    image: cassandra
+    environment:
+      CASSANDRA_LISTEN_ADDRESS:
+    ports:
+    volumes:   
