@@ -1,4 +1,4 @@
-version: '2.0'
+version: '3'
 
 
 services:
@@ -9,11 +9,13 @@ services:
   kafka:
     image: wurstmeister/kafka
 
-  app:
+  app1:
     depends_on:
       - cassandra
       - kafka
-    build: "./web"
+    build: ./web
+    ports:
+      - "80:80"
     links:
       - cassandra
       - kafka
