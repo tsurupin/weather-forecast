@@ -1,0 +1,52 @@
+version: '3'
+
+
+services:
+  cassandra:
+    image: cassandra
+    ports:
+      - "9042:9042"
+
+#  zookeeper:
+#    image: wurstmeister/zookeeper
+#    ports:
+#      - "2181:2181"
+#  kafka:
+#    image: ches/kafka
+#    depends_on:
+#      - zookeeper
+#    environment:
+#      # Use container hostname support of the default Compose network
+#      ZOOKEEPER_IP: zookeeper
+#    ports:
+#      - '9092:9092'  # Kafka broker
+#      - '7203:7203'  # JMX
+#    volumes:
+#      - kafka-data:/data
+#      - kafka-logs:/logs
+#
+#  zookeeper:
+#    image: zookeeper:3.4
+#    restart: unless-stopped
+#    ports:
+#      - '2181:2181'
+
+  app:
+    depends_on:
+      - cassandra
+#      - kafka
+
+    build: ./web
+    ports:
+      - "80:80"
+    volumes:
+      - ./web/app:/app
+
+#volumes:
+#  kafka-data:
+#  kafka-logs:
+#  spark:
+#    image: jupyter/pyspark-notebook
+#    depends_on:
+#      - cassandra
+#      - kafka
