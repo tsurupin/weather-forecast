@@ -1,10 +1,15 @@
 from flask import Flask, jsonify, render_template
-#from cassandra.cluster import Cluster
-from kafka import KafkaProducer, KafkaConsumer
+from cassandra.cluster import Cluster
+from cassandra.query import ordered_dict_factory
+from uwsgidecorators import postfork
+#from kafka import KafkaProducer, KafkaConsumer
 # from .settings import BOOTSTRAP_SERVER, TOPIC_NAME
 import logging
-#logging.basicConfig(level=logging.DEBUG)
-#cluster = Cluster()
+import os
+from datetime import datetime
+logging.basicConfig(level=logging.DEBUG)
+
+
 BOOTSTRAP_SERVER = "172.22.0.3"
 TOPIC_NAME = "test_kafka"
 app = Flask(__name__,  static_folder="../static/dist", template_folder="../static")
@@ -27,10 +32,25 @@ tasks = [
 
 # @app.before_request
 # def before_request():
-#
+#   session = cluster.connect('test1')
+session = None
+prepared = None
+@postfork
+def connect():
+  global session, prepared, cluster
+  try:
+    cluster = Cluster(['127.0.0.1'], port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042)))
+    session = cluster.connect()
+  except Exception as error:
+    cluster = None
+    session = None
+    print(error)
+  print("hogeege")
+
 
 @app.route("/")
 def hello():
+  print("hoasdasdas")
 
   return render_template("index.html")
   #return "Hey I'm using Docker!"
@@ -64,6 +84,19 @@ def test():
 
   return "test"
 
+@app.route('/cassandra', methods=['GET'])
+def cassandra():
+
+  session.row_factory = ordered_dict_factory
+  rows = session.execute('SELECT * FROM system.schema_keyspaces LIMIT 10')
+
+  return jsonify(data=rows, hostname=os.uname()[1],
+                 current_time=str(datetime.now()))
+  # cluster = Cluster()
+  # session = cluster.connect('test1')
+  # print(session)
+  # print("cassandra---------------")
+  # return "cassandra"
 @app.route('/todo/api/v1.0/tasks', methods=['GET'])
 def get_tasks():
   return jsonify({'tasks': tasks})

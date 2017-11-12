@@ -16,7 +16,6 @@ RUN pip install -r /tmp/requirements.txt
 #ADD test.py /test.py
 #RUN chmod +x /test.py
 WORKDIR /app
-
 ENV MESSAGE "hello from Docker"
 #CMD cron && touch /etc/cron.d/test-cron && tail -f /dev/null
-CMD ["python", "cassandra-test.py"]
+#CMD ["python", "main.py"]
