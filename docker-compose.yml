@@ -1,34 +1,61 @@
-version: '3'
+#version: '3'
 
-
-services:
-  app:
-    build: ./web
-    depends_on:
-      - cassandra
-    ports:
-      - "80:80"
-    links:
-      - cassandra
-    volumes:
-      - ./web/app:/app
-  cassandra:
-    image: cassandra:2.2.0
-    ports:
-      - '9042:9042'
-#      - '9160:9160'
-#      - '7000:7000'
-#      - '7001:7001'
-##    restart: always
-#    environment:
-      #CASSANDRA_BROADCAST_ADDRESS: '172.22.0.2'
+#services:
+#app:
+#  build: ./web
+#  ports:
+#   - "8000:5000"
+#  links:
+#   - cassandra
+#  volumes:
+#    - ./web:/web
+#  command: python /web/app/main.py
 #
-##      CASSANDRA_SEEDS: localhost
-##    volumes:
-##      - /data/cassandra:/var/lib/cassandra
+#cassandra:
+#  image: cassandra
+
+cron:
+  build: ./cron
+  volumes:
+    - ./cron:/cron
+  command: python /cron/app/main.py
+
+
+
+#version: '3'
+#
+#
+#services:
+#  app:
+#    build: ./web
+#    ports:
+#      - "80:80"
+#    expose:
+#      - "80"
+#    links:
+#      - cassandra
+#    volumes:
+#      - ./web/app:/app
 ##    networks:
 ##      - weather
-#
+#  cassandra:
+#    image: cassandra
+#    ports:
+#      - '9042:9042'
+#      - '9160:9160'
+#    expose:
+#      - "9042"
+##    environment:
+##      CASSANDRA_LISTEN_ADDRESS: '192.168.99.100'
+##      CASSANDRA_BROADCAST_ADDRESS: '192.168.99.100'
+###      CQLSH_NO_BUNDLED: 1
+##    restart: always
+##      CASSANDRA_SEEDS: localhost
+###    volumes:
+###      - /data/cassandra:/var/lib/cassandra
+##    networks:
+##      - weather
+##
 #
 ##  zookeeper:
 ##    image: wurstmeister/zookeeper
@@ -82,5 +109,5 @@ services:
 ##networks:
 ##  weather:
 ##    driver: bridge
-#
-#
+##
+##
