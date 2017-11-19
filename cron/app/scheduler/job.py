@@ -8,17 +8,13 @@ from crontab import CronTab
 from datetime import datetime, timedelta
 import math
 
+
 class JobController(object):
-    """
-    ジョブ実行Controller
-    """
+
 
     @classmethod
     def run(cls, crontab):
-        """
-        処理実行
-        :param crontab: job schedule
-        """
+
         def receive_func(job):
             @functools.wraps(job)
             def wrapper():
@@ -43,28 +39,15 @@ class JobController(object):
 
 
 class JobSettings(object):
-    """
-    出力設定
-    """
 
     def __init__(self, crontab):
-        """
-        :param crontab: crontab.CronTab
-        """
+
         self._crontab = crontab
 
     def schedule(self):
-        """
-        次回実行
-        :return: datetime
-        """
         crontab = self._crontab
         return datetime.now() + timedelta(seconds=math.ceil(crontab.next()))
 
     def interval(self):
-        """
-        次回実行までの時間
-        :return: seconds
-        """
         crontab = self._crontab
         return math.ceil(crontab.next())

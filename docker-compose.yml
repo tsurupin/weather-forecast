@@ -18,7 +18,27 @@ cron:
   build: ./cron
   volumes:
     - ./cron:/cron
+  links:
+    - kafka
   command: python /cron/app/main.py
+
+zookeeper:
+  image: wurstmeister/zookeeper
+  ports:
+    - "2181:2181"
+kafka:
+  image: ches/kafka
+  links:
+    - zookeeper
+  environment:
+    # Use container hostname support of the default Compose network
+    ZOOKEEPER_IP: zookeeper
+  ports:
+    - '9092:9092'  # Kafka broker
+    - '7203:7203'  # JMX
+  volumes:
+    - kafka-data:/data
+    - kafka-logs:/logs
 
 
 
