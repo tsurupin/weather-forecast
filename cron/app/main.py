@@ -6,8 +6,10 @@ from multiprocessing import Pool
 from scheduler.job import JobController
 from weather_client.client import WeatherClient
 from kafka import KafkaConsumer
-
-BOOTSTRAP_SERVER = '192.168.99.100'
+logging.basicConfig(level=logging.DEBUG)
+TOPIC_NAME = "test_kafka"
+#BOOTSTRAP_SERVER = '192.168.99.100'
+BOOTSTRAP_SERVER = "192.168.99.100"
 @JobController.run("*/1 * * * *")
 def fetch_weather_data():
     try:
@@ -19,10 +21,18 @@ def fetch_weather_data():
 @JobController.run("*/1 * * * *")
 def consume_weather_data():
     try:
-        logging.info("consumer is coming---------------------")
-        consumer = KafkaConsumer(bootstrap_servers=BOOTSTRAP_SERVER)
-        logging.info(consumer)
 
+
+        logging.critical("----------start consuming-------")
+
+        consumer = KafkaConsumer(TOPIC_NAME, bootstrap_servers=BOOTSTRAP_SERVER, group_id='my_favorite_group')
+        logging.info(consumer)
+        logging.critical("----------consumer-------")
+        metrics = consumer.metrics()
+        logging.info(metrics)
+        logging.critical("----------metrics-------")
+
+        logging.critical("----------end consuming-------")
 
         for msg in consumer:
             logging.info("--------------------------a")
