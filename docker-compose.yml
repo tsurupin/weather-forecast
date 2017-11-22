@@ -13,52 +13,33 @@
 #
 #cassandra:
 #  image: cassandra
+version: '2'
+services:
+  cron:
+    build: ./cron
+    volumes:
+      - ./cron:/cron
+    links:
+      - kafka
+    command: python /cron/app/main.py
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: "192.168.99.100"
+      KAFKA_ADVERTISED_PORT: "9092"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "test:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
-cron:
-  build: ./cron
-  volumes:
-    - ./cron:/cron
-  links:
-    - zookeeper
-    - kafka
-  command: python /cron/app/main.py
-zookeeper:
-  image: zookeeper:3.4
-  restart: unless-stopped
-  ports:
-    - "2181:2181"
-  environment:
-    ZOO_SERVERS:
-
-kafka:
-  image: ches/kafka
-  links:
-    - zookeeper
-  environment:
-    # Use container hostname support of the default Compose network
-    ZOOKEEPER_IP: zookeeper
-  ports:
-    - '9092:9092'  # Kafka broker
-    - '7203:7203'  # JMX
-  volumes:
-    - kafka-data:/data
-    - kafka-logs:/logs
-
-zookeeper:
-  image: jplock/zookeeper
-  ports:
-    -  "2181:2181"
-
-kafka:
-  image: wurstmeister/kafka:0.8.1
-  ports:
-    - '9092:9092'
-  links:
-    - zookeeper:zk
-  environment:
-    BROKER_ID: 1
-    HOST_IP: 192.168.99.100
-    PORT: 9092
 
 #version: '3'
 #
@@ -144,8 +125,8 @@ kafka:
 ##      - cassandra
 ##      - kafka
 #
-##networks:
-##  weather:
-##    driver: bridge
-##
-##
+#networks:
+#  weather:
+#    driver: bridge
+#
+#
