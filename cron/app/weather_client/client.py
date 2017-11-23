@@ -7,10 +7,11 @@ from weather_client.transformer import Transformer
 logging.basicConfig(level=logging.DEBUG)
 
 
-#BOOTSTRAP_SERVER = "192.168.99.100"
-BOOTSTRAP_SERVER = "192.168.99.100"
+BOOTSTRAP_SERVER = "172.17.0.1"
+#BOOTSTRAP_SERVER = "kafka"
 
-TOPIC_NAME = "test_kafka"
+
+TOPIC_NAME = "test"
 WEATHER_API_URL = ""
 
 class WeatherClient(object):
@@ -26,10 +27,10 @@ class WeatherClient(object):
         transformer = Transformer(self._records)
         transformed_records = transformer.run()
         producer =  KafkaProducer(bootstrap_servers=[BOOTSTRAP_SERVER])
-        producer.send(TOPIC_NAME, b'test docker')
-        #metrics = producer.metrics()
-        #logging.info(metrics)
-        #logging.critical("----------end processing-------")
+        producer.send(TOPIC_NAME, b'raw_bytes')
+        metrics = producer.metrics()
+        logging.info(metrics)
+        logging.critical("----------end processing-------")
 
 
 
