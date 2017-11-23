@@ -33,13 +33,13 @@ services:
     depends_on:
       - zookeeper
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: "192.168.99.100"
+      KAFKA_ADVERTISED_HOST_NAME: "172.17.0.1" # docker-machin ssh dev; ifconfig docker0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
       KAFKA_ADVERTISED_PORT: "9092"
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: "test:1:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
 
 #version: '3'
 #

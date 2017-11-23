@@ -8,7 +8,7 @@ from weather_client.client import WeatherClient
 from kafka import KafkaConsumer
 logging.basicConfig(level=logging.DEBUG)
 TOPIC_NAME = "test"
-BOOTSTRAP_SERVER = '192.168.99.100'
+BOOTSTRAP_SERVER = '172.17.0.1'
 #BOOTSTRAP_SERVER = "kafka"
 #BOOTSTRAP_SERVER = "192.168.2.74"
 @JobController.run("*/1 * * * *")
@@ -29,15 +29,17 @@ def consume_weather_data():
         consumer = KafkaConsumer(TOPIC_NAME, bootstrap_servers=[BOOTSTRAP_SERVER])
         logging.info(consumer)
         logging.critical("----------consumer-------")
-        metrics = consumer.metrics()
-        logging.info(metrics)
+
 
 
         logging.critical("----------end consuming-------")
 
         for msg in consumer:
             logging.info("--------------------------a")
-            logging.info(msg)
+            logging.info(msg.value)
+            print(msg)
+        metrics = consumer.metrics()
+        logging.info(metrics)
         consumer.close()
     except Exception as e:
         logging.error(e)
@@ -50,7 +52,7 @@ def main():
     )
 
 
-    jobs = [fetch_weather_data, consume_weather_data]
+    jobs = [consume_weather_data]
 
     # multi process running
     p = Pool(len(jobs))

@@ -7,7 +7,7 @@ from weather_client.transformer import Transformer
 logging.basicConfig(level=logging.DEBUG)
 
 
-BOOTSTRAP_SERVER = "192.168.2.74"
+BOOTSTRAP_SERVER = "172.17.0.1"
 #BOOTSTRAP_SERVER = "kafka"
 
 
@@ -28,7 +28,7 @@ class WeatherClient(object):
         transformed_records = transformer.run()
         producer =  KafkaProducer(bootstrap_servers=[BOOTSTRAP_SERVER])
         producer.send(TOPIC_NAME, b'raw_bytes')
-        #metrics = producer.metrics()
+        metrics = producer.metrics()
         logging.info(metrics)
         logging.critical("----------end processing-------")
 
