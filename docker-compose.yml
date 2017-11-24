@@ -11,35 +11,50 @@
 #    - ./web:/web
 #  command: python /web/app/main.py
 #
+#
+#cron:
+#  build: ./cron
+#  volumes:
+#    - ./cron:/cron
+#  links:
+#    - kafka
+#  command: python /cron/app/main.py
+zookeeper:
+  image: wurstmeister/zookeeper
+  ports:
+    - "2181:2181"
+kafka:
+  image: wurstmeister/kafka
+  ports:
+    - "9092:9092"
+  links:
+    - zookeeper
+  environment:
+    KAFKA_ADVERTISED_HOST_NAME: "172.17.0.1" # docker-machin ssh dev; ifconfig docker0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
+    KAFKA_ADVERTISED_PORT: "9092"
+    KAFKA_BROKER_ID: 1
+    KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    KAFKA_CREATE_TOPICS: "test:1:1"
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
 #cassandra:
 #  image: cassandra
-version: '2'
-services:
-  cron:
-    build: ./cron
-    volumes:
-      - ./cron:/cron
-    links:
-      - kafka
-    command: python /cron/app/main.py
-  zookeeper:
-    image: wurstmeister/zookeeper
-    ports:
-      - "2181:2181"
-  kafka:
-    image: wurstmeister/kafka
-    ports:
-      - "9092:9092"
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_ADVERTISED_HOST_NAME: "172.17.0.1" # docker-machin ssh dev; ifconfig docker0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
-      KAFKA_ADVERTISED_PORT: "9092"
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "test:1:1"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+#  ports:
+#    - '9042:9042'
+#    - '9160:9160'
+#  expose:
+#     - "9042"
+#  environment:
+#    CASSANDRA_LISTEN_ADDRESS: '192.168.99.100'
+#    CASSANDRA_BROADCAST_ADDRESS: '192.168.99.100'
+#  restart: always
+stream:
+  image: jupyter/pyspark-notebook
+  links:
+    #- cassandra
+    - kafka
+
+
 
 #version: '3'
 #
@@ -76,29 +91,6 @@ services:
 ##      - weather
 ##
 #
-##  zookeeper:
-##    image: wurstmeister/zookeeper
-##    ports:
-##      - "2181:2181"
-##  kafka:
-##    image: ches/kafka
-##    depends_on:
-##      - zookeeper
-##    environment:
-##      # Use container hostname support of the default Compose network
-##      ZOOKEEPER_IP: zookeeper
-##    ports:
-##      - '9092:9092'  # Kafka broker
-##      - '7203:7203'  # JMX
-##    volumes:
-##      - kafka-data:/data
-##      - kafka-logs:/logs
-##
-##  zookeeper:
-##    image: zookeeper:3.4
-##    restart: unless-stopped
-##    ports:
-##      - '2181:2181'
 ###
 ##  app:
 ##    depends_on:
