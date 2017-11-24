@@ -12,13 +12,13 @@
 #  command: python /web/app/main.py
 #
 #
-#cron:
-#  build: ./cron
-#  volumes:
-#    - ./cron:/cron
-#  links:
-#    - kafka
-#  command: python /cron/app/main.py
+cron:
+  build: ./cron
+  volumes:
+    - ./cron:/cron
+  links:
+    - kafka
+  command: python /cron/app/main.py
 zookeeper:
   image: wurstmeister/zookeeper
   ports:
@@ -50,6 +50,10 @@ kafka:
 #  restart: always
 stream:
   image: jupyter/pyspark-notebook
+  ports:
+    - 8888:8888
+  volumes:
+    - ./spark/work:/home/jovyan/work
   links:
     #- cassandra
     - kafka
