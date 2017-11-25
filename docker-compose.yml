@@ -11,7 +11,7 @@
 #    - ./web:/web
 #  command: python /web/app/main.py
 #
-#
+
 cron:
   build: ./cron
   volumes:
@@ -37,15 +37,15 @@ kafka:
     KAFKA_CREATE_TOPICS: "test:1:1"
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
-#cassandra:
-#  image: cassandra
-#  ports:
-#    - '9042:9042'
-#    - '9160:9160'
-#  expose:
-#     - "9042"
+cassandra:
+  image: cassandra
+  ports:
+    - '9042:9042'
+    - '9160:9160'
+  expose:
+     - "9042"
 #  environment:
-#    CASSANDRA_LISTEN_ADDRESS: '192.168.99.100'
+#    CASSANDRA_LISTEN_ADDRESS: ''
 #    CASSANDRA_BROADCAST_ADDRESS: '192.168.99.100'
 #  restart: always
 stream:
@@ -55,7 +55,7 @@ stream:
   volumes:
     - ./spark/work:/home/jovyan/work
   links:
-    #- cassandra
+    - cassandra
     - kafka
 
 
