@@ -12,9 +12,10 @@ BOOTSTRAP_SERVER = '172.17.0.1'
 #BOOTSTRAP_SERVER = "kafka"
 #BOOTSTRAP_SERVER = "192.168.2.74"
 @JobController.run("*/1 * * * *")
-def fetch_weather_data():
+def fetch_weather_data(last_lookup_at):
     try:
-        client = WeatherClient([1,2,3])
+        logging.critical("----------start fetching-------")
+        client = WeatherClient()
         client.run()
     except Exception as e:
         logging.error(e)
@@ -51,8 +52,8 @@ def main():
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-
-    jobs = [consume_weather_data]
+    last_lookup_at = {}
+    jobs = [fetch_weather_data, consume_weather_data]
 
     # multi process running
     p = Pool(len(jobs))
