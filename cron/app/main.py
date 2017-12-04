@@ -5,13 +5,10 @@ import logging
 from multiprocessing import Pool
 from scheduler.job import JobController
 from weather_client.client import WeatherClient
-from kafka import KafkaConsumer
 logging.basicConfig(level=logging.DEBUG)
 TOPIC_NAME = "test"
 BOOTSTRAP_SERVER = '172.17.0.1'
-#BOOTSTRAP_SERVER = "kafka"
-#BOOTSTRAP_SERVER = "192.168.2.74"
-
+#
 weather_client = None
 @JobController.run("*/1 * * * *")
 def fetch_weather_data():
@@ -26,30 +23,6 @@ def fetch_weather_data():
     except Exception as e:
         logging.error(e)
 
-@JobController.run("*/1 * * * *")
-def consume_weather_data():
-    try:
-
-
-        logging.critical("----------start consuming-------")
-
-        # consumer = KafkaConsumer(TOPIC_NAME, bootstrap_servers=[BOOTSTRAP_SERVER])
-        # logging.info(consumer)
-        # logging.critical("----------consumer-------")
-        #
-        #
-        #
-        # logging.critical("----------end consuming-------")
-
-        # for msg in consumer:
-        #     logging.info("--------------------------a")
-        #     logging.info(msg.value)
-        #     print(msg)
-        # metrics = consumer.metrics()
-        # logging.info(metrics)
-        # consumer.close()
-    except Exception as e:
-        logging.error(e)
 def main():
 
     logging.basicConfig(
@@ -59,7 +32,7 @@ def main():
     )
 
 
-    jobs = [fetch_weather_data, consume_weather_data]
+    jobs = [fetch_weather_data]
 
     # multi process running
     p = Pool(len(jobs))
