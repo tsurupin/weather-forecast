@@ -4,20 +4,22 @@ class Transformer(object):
 
     def run(self):
         data = {}
-        for key, value in self._raw_data:
+
+        for key, value in self._raw_data.items():
+
             if key == 'coord':
                 data["longitude"] = value['lon']
-                data["latitude"] = value['lan']
+                data["latitude"] = value['lat']
             if key == 'weather':
-                data["condition"] = value["main"]
-                data["condition_details"] = value["details"]
+                data["condition"] = value[0]["main"]
+                data["condition_details"] = value[0]["description"]
             if key == "main":
                 data["temperature"] = value["temp"]
                 data["pressure"] = value["pressure"]
                 data["humidity"] = value["humidity"]
             if key == "wind":
                 data["wind_seepd"] = value["speed"]
-                data["wind_degree"] = value["degree"]
+                data["wind_degree"] = value["deg"]
             if key == "clouds":
                 data["clouds_all"] = value["all"]
             if key == "rain":

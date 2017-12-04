@@ -11,12 +11,18 @@ TOPIC_NAME = "test"
 BOOTSTRAP_SERVER = '172.17.0.1'
 #BOOTSTRAP_SERVER = "kafka"
 #BOOTSTRAP_SERVER = "192.168.2.74"
+
+weather_client = None
 @JobController.run("*/1 * * * *")
-def fetch_weather_data(last_lookup_at):
+def fetch_weather_data():
     try:
+        global weather_client
+        if weather_client is None:
+            weather_client = WeatherClient()
         logging.critical("----------start fetching-------")
-        client = WeatherClient()
-        client.run()
+
+
+        weather_client.run()
     except Exception as e:
         logging.error(e)
 
@@ -52,7 +58,7 @@ def main():
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-    last_lookup_at = {}
+
     jobs = [fetch_weather_data, consume_weather_data]
 
     # multi process running

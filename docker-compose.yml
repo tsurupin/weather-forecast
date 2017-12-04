@@ -41,28 +41,28 @@ kafka:
     KAFKA_CREATE_TOPICS: "test:1:1"
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
-##cassandra:
-##  image: cassandra
-##  ports:
-##    - '9042:9042'
-##    - '9160:9160'
-##  expose:
-##     - "9042"
-##  environment:
-##    CASSANDRA_LISTEN_ADDRESS: ''
-##    CASSANDRA_BROADCAST_ADDRESS: '192.168.99.100'
-##  restart: always
-#stream:
-#  build: ./spark
+#cassandra:
+#  image: cassandra
 #  ports:
-#    - 8888:8888
-#  volumes:
-#    - ./spark/work:/home/jovyan/work
-#  command: "python /home/jovyan/work/streaming.py"
-#  links:
-#    #- cassandra
-#    - kafka
-#
+#    - '9042:9042'
+#    - '9160:9160'
+#  expose:
+#     - "9042"
+#  environment:
+#    CASSANDRA_LISTEN_ADDRESS: ''
+#    CASSANDRA_BROADCAST_ADDRESS: '192.168.99.100'
+#  restart: always
+stream:
+  build: ./spark
+  ports:
+    - 8888:8888
+  volumes:
+    - ./spark/work:/home/jovyan/work
+  command: "python /home/jovyan/work/streaming.py"
+  links:
+    #- cassandra
+    - kafka
+
 
 
 
