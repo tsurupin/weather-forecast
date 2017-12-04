@@ -18,6 +18,10 @@ cron:
     - ./cron:/cron
   links:
     - kafka
+  env_file:
+    - .env
+  environment:
+    - WEATHER_API_TOKEN=${WEATHER_API_TOKEN}
   command: python /cron/app/main.py
 zookeeper:
   image: wurstmeister/zookeeper

@@ -1,2 +1,3 @@
 crontab==0.20.3
 kafka-python==1.3.5
+requests==2.18.4
