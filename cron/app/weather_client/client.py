@@ -59,7 +59,7 @@ class WeatherClient(object):
         #         self._last_lookup_at[city_id] = transformed_record['measured_at']
         #         logging.info("send_record city_id:{} time:#{}".format(city_id, transformed_record['measured_at']))
 
-        transformed_record = {"condition_details": "scattered clouds", "city": "San Francisco", "latitude": 15.35, "pressure": 1011, "country_code": "PH", "wind_seepd": 3.6, "temperature": 299.15, "sunrise": 1512425382, "longitude": 120.83, "condition": "Clouds", "sunset": 1512465917, "wind_degree": 320, "humidity": 78, "measured_at": 1512489600, "clouds_all": 40}
+        transformed_record = {"condition_details": "scattered clouds", "city": "San Francisco", "latitude": 15.35, "pressure": 1011, "country_code": "PH", "wind_speed": 3.6, "temperature": 299.15, "sunrise": 1512425382, "longitude": 120.83, "condition": "Clouds", "sunset": 1512465917, "wind_degree": 320, "humidity": 78, "measured_at": 1512489600, "clouds_all": 40}
         msg =  json.dumps(transformed_record).encode("utf-8")
         self._producer.send(TOPIC_NAME, msg)
         #self._last_lookup_at[city_id] = transformed_record['measured_at']
