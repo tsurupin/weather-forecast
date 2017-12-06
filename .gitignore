@@ -102,3 +102,5 @@ ENV/
 
 /node_modules
 .idea/
+/data
+/metastore_db

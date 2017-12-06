@@ -24,27 +24,30 @@ def fetch_weather_data():
         logging.error(e)
 
 def main():
+    while True:
+        fetch_weather_data()
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="time:%(asctime)s.%(msecs)03d\tprocess:%(process)d" + "\tmessage:%(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
-
-
-    jobs = [fetch_weather_data]
-
-    # multi process running
-    p = Pool(len(jobs))
-    logging.info(p)
-    try:
-        for job in jobs:
-            p.apply_async(job)
-        p.close()
-        p.join()
-
-    except KeyboardInterrupt:
-        logging.info("exit")
+    #
+    # logging.basicConfig(
+    #     level=logging.INFO,
+    #     format="time:%(asctime)s.%(msecs)03d\tprocess:%(process)d" + "\tmessage:%(message)s",
+    #     datefmt="%Y-%m-%d %H:%M:%S"
+    # )
+    #
+    #
+    # jobs = [fetch_weather_data]
+    #
+    # # multi process running
+    # p = Pool(len(jobs))
+    # logging.info(p)
+    # try:
+    #     for job in jobs:
+    #         p.apply_async(job)
+    #     p.close()
+    #     p.join()
+    #
+    # except KeyboardInterrupt:
+    #     logging.info("exit")
 
 
 if __name__ == '__main__':

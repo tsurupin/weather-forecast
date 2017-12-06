@@ -12,4 +12,4 @@ COPY start-notebook.sh /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/start-notebook.sh
 USER $NB_USER
-CMD ["start-notebook.sh"]
+CMD start-notebook.sh

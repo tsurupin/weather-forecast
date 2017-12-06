@@ -18,7 +18,7 @@ class Transformer(object):
                 data["pressure"] = value["pressure"]
                 data["humidity"] = value["humidity"]
             if key == "wind":
-                data["wind_seepd"] = value["speed"]
+                data["wind_speed"] = value["speed"]
                 data["wind_degree"] = value["deg"]
             if key == "clouds":
                 data["clouds_all"] = value["all"]
