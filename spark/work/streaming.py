@@ -13,6 +13,7 @@ from pyspark.sql.types import *
 import logging
 import datetime
 import json
+import WeatherForecast
 
 CASSANDRA_FORMAT = "org.apache.spark.sql.cassandra"
 TABLE_NAME = "raw_data"
@@ -58,7 +59,7 @@ def save_to_cassandra(rdd):
 
         named_rdd = rdd.map(convert_to_row)
         stream_df = spark.createDataFrame(named_rdd, schema)
-        stream_df.show()
+        #stream_df.show()
         stream_df.write \
             .format(CASSANDRA_FORMAT) \
             .mode('append') \
@@ -86,25 +87,31 @@ def convert_to_row(c):
         wind_speed=c.get("wind_speed")
 
     )
+    # fetch prediction
+    # fetch last week weather
+    # online learning
+    # city, condition, predictid percent, rain_3h, snow_3h
 
+def update_forecast(data):
+    forecast = WeatherForecast()
+    forecast.fit(data)
+    forecast.predict()
 
 def main():
     conf = SparkConf(True).setMaster("local[*]").setAppName("jupyter pyspark").set("spark.cassandra.connection.host", "cassandra")
     sc = SparkContext(conf=conf)
     sc.setLogLevel("WARN")
 
-    sqlContext = SQLContext(sc)
-
     ssc = StreamingContext(sc, 2)
 
     weather_stream = KafkaUtils.createDirectStream(ssc, [TOPIC_NAME], {"metadata.broker.list": BOOTSTRAP_SERVER})
     parsed =  weather_stream.map(lambda v: json.loads(v[1]))
 
-    #lines = weather_stream.map(lambda x: (x["city"], x["longitude"], x["latitude"]))
     parsed.pprint()
     logging.info(parsed)
 
     parsed.foreachRDD(lambda rdd: save_to_cassandra(rdd))
+    update_forecast(parsed)
 
 
 # not sure how to save to cassandra

@@ -6,6 +6,8 @@ from cassandra.cluster import Cluster
 from cassandra.query import ordered_dict_factory
 
 app = Flask(__name__)
+KEYSPACE_NAME = "weather_forecast"
+TABLE_NAME = "prediction"
 
 @app.route('/')
 def index():
@@ -25,11 +27,18 @@ def test():
     print(session)
 
     session.row_factory = ordered_dict_factory
-    rows = session.execute('SELECT * FROM system_schema.keyspaces LIMIT 10')
-    print(rows)
+    sql = '''
+        SELECT city, condition, forecast_on, predicted_at, prediction_percent, rain_3h, snow_3h
+        FROM {}.{}
+        WHERE forecast_on > {}
+    '''.format(KEY_SPACE_NAME, TABLE_NAME, datetime.today())
+    #rows = session.execute('SELECT * FROM weather_forecast.prediction  10')
+    forecast_data = session.execute(sql)
+    print(forecast_data)
 
-    return jsonify(hostname=os.uname()[1],
-                   current_time=str(datetime.now()))
+    return jsonify(forecast_data=forecast_data)
+    # return jsonify(hostname=os.uname()[1],
+    #                current_time=str(datetime.now()))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
