@@ -4,18 +4,20 @@ from flask import Flask, jsonify, redirect, url_for
 
 from cassandra.cluster import Cluster
 from cassandra.query import ordered_dict_factory
-
+from kafka import KafkaProducer
 app = Flask(__name__)
 KEYSPACE_NAME = "weather_forecast"
 TABLE_NAME = "prediction"
+BOOTSTRAP_SERVER = "172.17.0.1"
+TOPIC_NAME = "batch_processing"
 
 @app.route('/')
 def index():
     """ root index redirects to test function """
-    return redirect(url_for('test'))
-
-@app.route('/test')
-def test():
+#     return redirect(url_for('test'))
+#
+# @app.route('/test')
+# def test():
     """ Try to establish Cassandra connection and return simple query results """
     print(os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost'))
     print(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
@@ -23,22 +25,28 @@ def test():
                       port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
                       )
 
-    session = cluster.connect()
+    session = cluster.connect(KEYSPACE_NAME)
     print(session)
 
     session.row_factory = ordered_dict_factory
-    sql = '''
+    sql = """
+
         SELECT city, condition, forecast_on, predicted_at, prediction_percent, rain_3h, snow_3h
-        FROM {}.{}
-        WHERE forecast_on > {}
-    '''.format(KEY_SPACE_NAME, TABLE_NAME, datetime.today())
+        FROM %s
+        WHERE forecast_on > %s
+    """
     #rows = session.execute('SELECT * FROM weather_forecast.prediction  10')
-    forecast_data = session.execute(sql)
+    forecast_data = session.execute(sql, (TABLE_NAME, datetime.date.today()))
     print(forecast_data)
 
     return jsonify(forecast_data=forecast_data)
     # return jsonify(hostname=os.uname()[1],
     #                current_time=str(datetime.now()))
+@app.route("/", methods=['POST'])
+def create():
+    producer = KafkaProducer(bootstrap_servers=[BOOTSTRAP_SERVER])
+    producer.send(TOPIC_NAME, b'new_process!')
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
