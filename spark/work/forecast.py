@@ -1,6 +1,6 @@
 from pyspark.sql import SQLContext, SparkSession, Row
 from pyspark.sql.types import *
-TABLE_NAME = "wprediction"
+TABLE_NAME = "prediction"
 KEY_SPACE = "weather_forecast"
 CASSANDRA_FORMAT = "org.apache.spark.sql.cassandra"
 import logging
@@ -31,6 +31,7 @@ class Forecast(object):
     def _get_schema(self):
         return StructType([
             StructField("city", StringType(), True),
+            StructField("country", StringType(), True),
             StructField("condition", StringType(), True),
             StructField("forecast_on", DateType(), True),
             StructField("predicted_at", TimestampType(), True),

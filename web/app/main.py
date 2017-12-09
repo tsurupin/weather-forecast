@@ -1,47 +1,42 @@
 import os
-from datetime import datetime
+import datetime
 from flask import Flask, jsonify, redirect, url_for
-
 from cassandra.cluster import Cluster
 from cassandra.query import ordered_dict_factory
 from kafka import KafkaProducer
+
 app = Flask(__name__)
 KEYSPACE_NAME = "weather_forecast"
 TABLE_NAME = "prediction"
 BOOTSTRAP_SERVER = "172.17.0.1"
 TOPIC_NAME = "batch_processing"
 
+
 @app.route('/')
 def index():
-    """ root index redirects to test function """
-#     return redirect(url_for('test'))
-#
-# @app.route('/test')
-# def test():
-    """ Try to establish Cassandra connection and return simple query results """
-    print(os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost'))
-    print(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
+
     cluster = Cluster([os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost')],
                       port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
                       )
 
     session = cluster.connect(KEYSPACE_NAME)
-    print(session)
 
     session.row_factory = ordered_dict_factory
     sql = """
-
         SELECT city, condition, forecast_on, predicted_at, prediction_percent, rain_3h, snow_3h
-        FROM %s
-        WHERE forecast_on > %s
+        FROM prediction
+        WHERE city = %s
+        AND predicted_at > %s
+        ALLOW FILTERING
     """
-    #rows = session.execute('SELECT * FROM weather_forecast.prediction  10')
-    forecast_data = session.execute(sql, (TABLE_NAME, datetime.date.today()))
-    print(forecast_data)
 
-    return jsonify(forecast_data=forecast_data)
-    # return jsonify(hostname=os.uname()[1],
-    #                current_time=str(datetime.now()))
+    today_timestamp = int(float(datetime.date.today().strftime("%s.%f"))) * 1000
+
+    city = 'san francisco'
+    forecast_data = session.execute(sql, (city, today_timestamp))
+
+    return jsonify(forecast_data=list(forecast_data))
+
 @app.route("/", methods=['POST'])
 def create():
     producer = KafkaProducer(bootstrap_servers=[BOOTSTRAP_SERVER])

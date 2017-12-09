@@ -1,29 +1,29 @@
 #version: '3'
 
 #services:
-#app:
-#  build: ./web
-#  ports:
-#   - "8000:5000"
-#  links:
-#   - cassandra
-#   - kafka
-#  volumes:
-#    - ./web:/web
-#  command: python /web/app/main.py
-#
-#
-cron:
-  build: ./cron
-  volumes:
-    - ./cron:/cron
+app:
+  build: ./web
+  ports:
+   - "8000:5000"
   links:
-    - kafka
-  env_file:
-    - .env
-  environment:
-    - WEATHER_API_TOKEN=${WEATHER_API_TOKEN}
-  command: python /cron/app/main.py
+   - cassandra
+   - kafka
+  volumes:
+    - ./web:/web
+  command: python /web/app/main.py
+
+#
+#cron:
+#  build: ./cron
+#  volumes:
+#    - ./cron:/cron
+#  links:
+#    - kafka
+#  env_file:
+#    - .env
+#  environment:
+#    - WEATHER_API_TOKEN=${WEATHER_API_TOKEN}
+#  command: python /cron/app/main.py
 zookeeper:
   image: wurstmeister/zookeeper
   ports:
@@ -55,20 +55,20 @@ cassandra:
   restart: always
   volumes:
     - ./data/cassandra:/var/lib/cassandra
-stream:
-  build: ./spark
-  ports:
-    - 8888:8888
-  environment:
-    - CASSANDRA_PORT=9042
-    - CQL_VERSION=3.4.4
-    - CASSANDRA_HOST=localhost
-  volumes:
-    - ./spark/work:/home/jovyan/work
-  command: "python /home/jovyan/work/streaming.py"
-  links:
-    - cassandra
-    - kafka
+#stream:
+#  build: ./spark
+#  ports:
+#    - 8888:8888
+#  environment:
+#    - CASSANDRA_PORT=9042
+#    - CQL_VERSION=3.4.4
+#    - CASSANDRA_HOST=localhost
+#  volumes:
+#    - ./spark/work:/home/jovyan/work
+#  command: "python /home/jovyan/work/streaming.py"
+#  links:
+#    - cassandra
+#    - kafka
 
 
 
