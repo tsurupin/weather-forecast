@@ -2,40 +2,47 @@ import os
 import datetime
 from flask import Flask, jsonify, redirect, url_for
 from cassandra.cluster import Cluster
-from cassandra.query import ordered_dict_factory
+from cassandra.query import ordered_dict_factory, dict_factory
 from kafka import KafkaProducer
-
+import json
 app = Flask(__name__)
 KEYSPACE_NAME = "weather_forecast"
 TABLE_NAME = "prediction"
 BOOTSTRAP_SERVER = "172.17.0.1"
 TOPIC_NAME = "batch_processing"
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
+
+cluster = Cluster([os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost')],
+                  port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
+                  )
+session = cluster.connect(KEYSPACE_NAME)
+session.row_factory = dict_factory
 
 @app.route('/')
 def index():
+    global session
 
-    cluster = Cluster([os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost')],
-                      port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
-                      )
-
-    session = cluster.connect(KEYSPACE_NAME)
-
-    session.row_factory = ordered_dict_factory
     sql = """
-        SELECT city, condition, forecast_on, predicted_at, prediction_percent, rain_3h, snow_3h
+        SELECT city, condition, prediction_percent, rain_3h, snow_3h
         FROM prediction
-        WHERE city = %s
-        AND predicted_at > %s
-        ALLOW FILTERING
+        --WHERE city = 'san francisco'
+        --WHERE city = %s
+        -- AND predicted_at > %s
+        -- ALLOW FILTERING
     """
 
-    today_timestamp = int(float(datetime.date.today().strftime("%s.%f"))) * 1000
+    #today_timestamp = int(float(datetime.date.today().strftime("%s.%f"))) * 1000
 
     city = 'san francisco'
-    forecast_data = session.execute(sql, (city, today_timestamp))
+    forecast_data = session.execute(sql)
+    logging.critical(forecast_data)
 
-    return jsonify(forecast_data=list(forecast_data))
+    forecast = list(forecast_data)[0]
+    logging.critical(forecast)
+
+    return json.dumps(forecast)
 
 @app.route("/", methods=['POST'])
 def create():
