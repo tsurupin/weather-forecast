@@ -6,6 +6,7 @@ CREATE KEYSPACE IF NOT EXISTS weather_forecast WITH replication =
 
 CREATE TABLE IF NOT EXISTS weather_forecast.raw_data
 (
+  id UUID,
   longitude float,
   latitude float,
   condition  text,
@@ -23,6 +24,16 @@ CREATE TABLE IF NOT EXISTS weather_forecast.raw_data
   sunrise timestamp,
   sunset timestamp,
   city varchar,
-  PRIMARY KEY (city)
+  PRIMARY KEY (id, city)
 );
 
+CREATE TABLE IF NOT EXISTS weather_forecast.prediction
+(
+  id UUID,
+  condition  text,
+  forecast_on date,
+  predicted_at timestamp,
+  preticipation_percent float,
+  city varchar,
+  PRIMARY KEY (id, city)
+);

@@ -99,8 +99,9 @@ ENV/
 
 # mypy
 .mypy_cache/
-
+**/node_modules
 /node_modules
 .idea/
 /data
 /metastore_db
+/web/app/static/dist/
