@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
-const Wrapper = styled.article`
+export const Wrapper = styled.article`
+  width: 100%
   
 `;
-export default Wrapper;
+

@@ -11,9 +11,9 @@ class WeatherIndexPage extends Component {
   }
   render() {
     return (
-      <article>
+      <div>
         <WeatherIndexContainer />
-      </article>
+      </div>
     );
   }
 

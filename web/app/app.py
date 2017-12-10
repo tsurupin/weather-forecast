@@ -7,6 +7,8 @@ from kafka import KafkaProducer
 import json
 import logging
 app = Flask(__name__)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 KEYSPACE_NAME = "weather_forecast"
 TABLE_NAME = "prediction"
 BOOTSTRAP_SERVER = "172.17.0.1"
@@ -15,6 +17,12 @@ TOPIC_NAME = "batch_processing"
 
 logging.basicConfig(level=logging.DEBUG)
 
+@app.after_request
+def add_header(response):
+    # response.cache_control.no_store = True
+    if 'Cache-Control' not in response.headers:
+        response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 @app.route('/')

@@ -10,11 +10,11 @@ const defaultProps = {
   submitted: false
 };
 
-const ReprocessButton = ({submitted, handleReprocess}) => {
+const ReprocessButton = ({submitting, handleReprocess}) => {
   <Wrapper
     type="button"
     onClick={ () => handleReprocess()}
-    disabled={submitted}
+    disabled={submitting}
   >
     Reprocess!
   </Wrapper>

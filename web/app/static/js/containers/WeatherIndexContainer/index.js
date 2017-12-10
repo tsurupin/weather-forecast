@@ -48,17 +48,18 @@ class WeatherIndexContainer extends Component {
   }
 
   render() {
-    const { predictions, historyRecords, submitting } = this.props;
+    const { predictions, pastRecords, submitting } = this.props;
 
+    console.log(predictions);
     return (
       <Wrapper>
         <PredictionTable predictions={predictions}/>
-        <HistoryTable historyRecords={historyRecords} />
-        <ReprocessButton submitting={submitting} />
+        <HistoryTable historyRecords={pastRecords} />
+        <ReprocessButton submitting={submitting} handleReprocess={this.handleReprocess()} />
       </Wrapper>
     );
   }
 }
 
-WeatherIndexContainer.peropTypes = propTypes;
+WeatherIndexContainer.propTypes = propTypes;
 export default connect(mapStateToProps, mapDispatchToProps)(WeatherIndexContainer);
