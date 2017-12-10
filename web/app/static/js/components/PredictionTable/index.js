@@ -28,17 +28,19 @@ const listNames = ['condition', 'precipitation_percent'];
 
 function renderList(predictions) {
   return listNames.map((keyName) => {
-    renderListComponent(keyName, predictions);
+    return renderListComponent(keyName, predictions);
   });
 }
 
 
 function renderListComponent(keyName, predictions) {
+
   let lists = [];
-  lists = [lists, (<Tr key={keyName}><Td key={keyName}>{keyName}</Td></Tr>)]
+  lists = [...lists, (<Tr key={keyName}><Td key={keyName}>{keyName}</Td></Tr>)]
   predictions.forEach((prediction, i) => (
-    lists = [lists, (<Tr key={i}><Td key={i}>{prediction[keyName]}</Td></Tr>)]
+    lists = [...lists, (<Tr key={i}><Td key={i}>{prediction[keyName]}</Td></Tr>)]
   ));
+
   return lists;
 }
 

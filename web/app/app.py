@@ -34,6 +34,7 @@ def index():
 @app.route("/api/v1/predictions", methods=['GET'])
 def predictions_index():
     #global session
+    logging.critical("predictions loading!!!")
     cluster = Cluster([os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost')],
                       port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
                       )
@@ -53,15 +54,13 @@ def predictions_index():
 
     city = 'san francisco'
     forecast_data = session.execute(sql)
-    logging.critical(forecast_data)
 
-    forecast = list(forecast_data)[0]
-    logging.critical(forecast)
-
-    return json.dumps(forecast)
+    forecast = list(forecast_data)
+    return jsonify(predictions=forecast)
 
 @app.route("/api/v1/predictions", methods=['POST'])
 def predictions_create():
+    logging.critical("predictions create called!!")
     try:
         kafka = KafkaProducer(bootstrap_servers=[BOOTSTRAP_SERVER])
         kafka.send(TOPIC_NAME, b'bulk_processing')
@@ -69,6 +68,7 @@ def predictions_create():
         return Response(status=201, mimetype='application/json')
     except Exception as error:
         logging.error(error)
+        logging.error("predictions_create error!!!!!!!!!!!!!!")
         return Response(error.message, status=400, mimetype='application/json')
 
 

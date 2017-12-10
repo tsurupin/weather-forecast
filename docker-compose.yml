@@ -5,9 +5,9 @@ app:
   build: ./web
   ports:
    - "8000:5000"
-#  links:
-#   - cassandra
-#   - kafka
+  links:
+   - cassandra
+   - kafka
   volumes:
     - ./web:/web
   command: python /web/app/app.py
@@ -24,37 +24,37 @@ app:
 #  environment:
 #    - WEATHER_API_TOKEN=${WEATHER_API_TOKEN}
 #  command: python /cron/app/app.py
-#zookeeper:
-#  image: wurstmeister/zookeeper
-#  ports:
-#    - "2181:2181"
-#kafka:
-#  image: wurstmeister/kafka
-#  ports:
-#    - "9092:9092"
-#  links:
-#    - zookeeper
-#  environment:
-#    KAFKA_ADVERTISED_HOST_NAME: "172.17.0.1" # docker-machine ssh dev; ifconfig docker0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
-#    KAFKA_ADVERTISED_PORT: "9092"
-#    KAFKA_BROKER_ID: 1
-#    KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-#    KAFKA_CREATE_TOPICS: "test:1:1"
-#  volumes:
-#    - /var/run/docker.sock:/var/run/docker.sock
-#cassandra:
-#  image: cassandra
-#  ports:
-#    - '9042:9042'
-#    - '9160:9160'
-#  expose:
-#     - "9042"
-#  environment:
-#    CASSANDRA_LISTEN_ADDRESS: ''
-#    CASSANDRA_BROADCAST_ADDRESS: '192.168.99.100'
-#  restart: always
-#  volumes:
-#    - ./data/cassandra:/var/lib/cassandra
+zookeeper:
+  image: wurstmeister/zookeeper
+  ports:
+    - "2181:2181"
+kafka:
+  image: wurstmeister/kafka
+  ports:
+    - "9092:9092"
+  links:
+    - zookeeper
+  environment:
+    KAFKA_ADVERTISED_HOST_NAME: "172.17.0.1" # docker-machine ssh dev; ifconfig docker0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
+    KAFKA_ADVERTISED_PORT: "9092"
+    KAFKA_BROKER_ID: 1
+    KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    KAFKA_CREATE_TOPICS: "test:1:1"
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+cassandra:
+  image: cassandra
+  ports:
+    - '9042:9042'
+    - '9160:9160'
+  expose:
+     - "9042"
+  environment:
+    CASSANDRA_LISTEN_ADDRESS: ''
+    CASSANDRA_BROADCAST_ADDRESS: '192.168.99.100'
+  restart: always
+  volumes:
+    - ./data/cassandra:/var/lib/cassandra
 #stream:
 #  build: ./spark
 #  ports:

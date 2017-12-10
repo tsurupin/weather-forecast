@@ -39,7 +39,13 @@ class WeatherIndexContainer extends Component {
     this.handleReprocess = this.handleReprocess.bind(this);
   }
 
+  componentWillMount() {
+    this.handleLoad();
+  }
+
+
   handleLoad() {
+    console.log("load data--------------");
     this.props.actions.fetchWeather();
   }
 
@@ -55,7 +61,7 @@ class WeatherIndexContainer extends Component {
     return (
       <Wrapper>
         <PredictionTable predictions={predictions}/>
-        <HistoryTable historyRecords={pastRecords} />
+        {/*<HistoryTable historyRecords={pastRecords} />*/}
         <ReprocessButton submitting={submitting} handleReprocess={this.handleReprocess} />
       </Wrapper>
     );

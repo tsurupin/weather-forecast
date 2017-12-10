@@ -25,19 +25,21 @@ const HistoryTable = ({pastRecords}) => {
 
 const listNames = ['condition', 'condition_details', 'temperature'];
 
-function renderList(predictions) {
+function renderList(pastRecords) {
   return listNames.map((keyName) => {
-    renderListComponent(keyName, predictions);
+    renderListComponent(keyName, pastRecords);
   });
 }
 
 
-function renderListComponent(keyName, predictions) {
+function renderListComponent(keyName, pastRecords) {
+
   let lists = [];
-  lists = [lists, (<Tr key={keyName}><Td key={keyName}>{keyName}</Td></Tr>)]
-  predictions.forEach((prediction, i) => (
-    lists = [lists, (<Tr key={i}><Td key={i}>{prediction[keyName]}</Td></Tr>)]
+  lists = [...lists, (<Tr key={keyName}><Td key={keyName}>{keyName}</Td></Tr>)]
+  pastRecords.forEach((pastRecord, i) => (
+    lists = [...lists, (<Tr key={i}><Td key={i}>{pastRecord[keyName]}</Td></Tr>)]
   ));
+
   return lists;
 }
 

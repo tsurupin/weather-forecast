@@ -13,6 +13,7 @@ export function fetchWeather() {
 
     return request
       .then((response) => {
+
         dispatch(fetchWeatherSuccess(response.data));
       })
       .catch((error) => {
@@ -25,7 +26,7 @@ export function fetchWeather() {
 function fetchWeatherSuccess(weather) {
   return {
     type: FETCH_WEATHER.SUCCESS,
-    payload: { weather },
+    payload: weather,
   };
 }
 
