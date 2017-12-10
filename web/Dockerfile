@@ -33,7 +33,7 @@ EXPOSE 5000
 #WORKDIR /app
 #ENV MESSAGE "hello from Docker"
 ##CMD cron && touch /etc/cron.d/test-cron && tail -f /dev/null
-##CMD ["python", "main.py"]
+##CMD ["python", "app.py"]
 
 #FROM python:3.5.0-slim
 #
@@ -46,11 +46,11 @@ EXPOSE 5000
 #RUN pip install -r requirements.txt
 #
 ### run the app
-#ADD /app/main.py app/main.py
+#ADD /app/app.py app/app.py
 #WORKDIR /app
 ### expose the port
 #EXPOSE 5000
 #
 ### start the command
-#CMD ["python", "main.py"]
+#CMD ["python", "app.py"]
 #

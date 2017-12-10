@@ -32,10 +32,8 @@ CREATE TABLE IF NOT EXISTS weather_forecast.prediction
   id UUID,
   condition  text,
   forecast_on date,
-  rain_3h int,
-  snow_3h int,
   predicted_at timestamp,
-  prediction_percent float,
+  preticipation_percent float,
   city varchar,
   PRIMARY KEY (id, city)
 );

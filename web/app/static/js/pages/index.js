@@ -1,0 +1,1 @@
+export WeatherIndexPage from './WeatherIndexPage';

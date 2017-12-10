@@ -31,13 +31,10 @@ class Forecast(object):
     def _get_schema(self):
         return StructType([
             StructField("city", StringType(), True),
-            StructField("country", StringType(), True),
             StructField("condition", StringType(), True),
             StructField("forecast_on", DateType(), True),
-            StructField("predicted_at", TimestampType(), True),
-            StructField("prediction_percent", FloatType(), True),
-            StructField("rain_3h", IntegerType()),
-            StructField("snow_3h", IntegerType())
+            StructField("precipitation_percent", FloatType(), True),
+            StructField("predicted_at", TimestampType(), True)
         ])
 
 
@@ -54,10 +51,8 @@ class Forecast(object):
             city=c.get("city"),
             condition=c.get("condition"),
             forecast_on=c.get("forecast_on"),
-            predicted_at=c.get("predicted_at"),
-            prediction_percent=c.get("prediction_percent"),
-            rain_3h=c.get("rain_3h"),
-            snow_3h=c.get("snow_3h")
+            precipitation_percent=c.get("precipitation_percent"),
+            predicted_at=c.get("predicted_at")
         )
 
 
