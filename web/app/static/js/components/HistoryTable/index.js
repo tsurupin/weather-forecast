@@ -11,33 +11,36 @@ const defaultProps = {
 };
 
 const HistoryTable = ({pastRecords}) => {
-  <Wrapper>
+  return (
+    <Wrapper>
       <Thead>
-        <Tr>
-          {renderList('measured_at', pastRecords)}
-        </Tr>
+        {renderListComponent('measured_at', pastRecords)}
       </Thead>
-    <Tbody>
-      ['condition', 'condition_details', 'temperature'].map(keyName => (
-        return(
-          <Tr>
-            {renderList(keyName, pastRecords)}
-          </Tr>
-        )
-      )
-    </Tbody>
-  </Wrapper>
+      <Tbody>
+        {renderList(pastRecords)}
+      </Tbody>
+    </Wrapper>
+  )
+}
+
+const listNames = ['condition', 'condition_details', 'temperature'];
+
+function renderList(predictions) {
+  return listNames.map((keyName) => {
+    renderListComponent(keyName, predictions);
+  });
 }
 
 
-function renderList(key, pastRecords) {
+function renderListComponent(keyName, predictions) {
   let lists = [];
-  lists.append(<Td>{key}</Td>);
-  pastRecords.forEach(prediction => (
-    lists.append(<Td>{prediction[key]}</Td>)
-  ))
+  lists = [lists, (<Tr key={keyName}><Td key={keyName}>{keyName}</Td></Tr>)]
+  predictions.forEach((prediction, i) => (
+    lists = [lists, (<Tr key={i}><Td key={i}>{prediction[keyName]}</Td></Tr>)]
+  ));
   return lists;
 }
+
 
 HistoryTable.propTypes = propTypes;
 HistoryTable.defaultProps = defaultProps;

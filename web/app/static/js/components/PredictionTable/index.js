@@ -11,33 +11,37 @@ const defaultProps = {
 };
 
 const PredictionTable = ({predictions}) => {
-  <Wrapper>
-      <Thead>
-        <Tr>
-          {renderList('day', predictions)}
-        </Tr>
-      </Thead>
-    <Tbody>
-      ['condition', 'precipitation_percent'].map(key => (
-        return(
-          <Tr>
-            {renderList(key, predictions)}
-          </Tr>
-        )
-      )
-    </Tbody>
-  </Wrapper>
+  return (
+      <Wrapper>
+        <Thead>
+          {renderListComponent('day', predictions)}
+        </Thead>
+        <Tbody>
+          {renderList(predictions)}
+        </Tbody>
+      </Wrapper>
+  )
 }
 
 
-function renderList(key, predictions) {
+const listNames = ['condition', 'precipitation_percent'];
+
+function renderList(predictions) {
+  return listNames.map((keyName) => {
+    renderListComponent(keyName, predictions);
+  });
+}
+
+
+function renderListComponent(keyName, predictions) {
   let lists = [];
-  lists.append(<Td>{key}</Td>);
-  predictions.forEach(prediction => (
-    lists.append(<Td>{prediction[key]}</Td>)
-  ))
+  lists = [lists, (<Tr key={keyName}><Td key={keyName}>{keyName}</Td></Tr>)]
+  predictions.forEach((prediction, i) => (
+    lists = [lists, (<Tr key={i}><Td key={i}>{prediction[keyName]}</Td></Tr>)]
+  ));
   return lists;
 }
+
 
 PredictionTable.propTypes = propTypes;
 PredictionTable.defaultProps = defaultProps;

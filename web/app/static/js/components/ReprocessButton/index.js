@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { Wrapper } from './styles';
 
 const propTypes = {
-  submitted: PropTypes.bool.isRequired
+  submitted: PropTypes.bool.isRequired,
+  handleReprocess: PropTypes.func.isRequired
 };
 
 const defaultProps = {
@@ -11,14 +12,18 @@ const defaultProps = {
 };
 
 const ReprocessButton = ({submitting, handleReprocess}) => {
-  <Wrapper
-    type="button"
-    onClick={ () => handleReprocess()}
-    disabled={submitting}
-  >
-    Reprocess!
-  </Wrapper>
+  return (
+    <Wrapper
+      type="button"
+      onClick={ () => handleReprocess()}
+      disabled={submitting}
+    >
+      Reprocess!
+    </Wrapper>
+  )
 }
+
+
 
 ReprocessButton.ropTypes = propTypes;
 ReprocessButton.defaultProps = defaultProps;

@@ -44,6 +44,7 @@ class WeatherIndexContainer extends Component {
   }
 
   handleReprocess() {
+    console.info("handle-process!!")
     this.props.actions.reprocess();
   }
 
@@ -55,7 +56,7 @@ class WeatherIndexContainer extends Component {
       <Wrapper>
         <PredictionTable predictions={predictions}/>
         <HistoryTable historyRecords={pastRecords} />
-        <ReprocessButton submitting={submitting} handleReprocess={this.handleReprocess()} />
+        <ReprocessButton submitting={submitting} handleReprocess={this.handleReprocess} />
       </Wrapper>
     );
   }
