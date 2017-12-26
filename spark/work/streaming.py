@@ -66,7 +66,7 @@ class Streaming(object):
         if data.count() is not None:
             from forecast import Forecast
             logging.critical("-----update_forecast")
-            forecast = Forecast()
+            forecast = Forecast(type="streaming")
             forecast.fit(data)
             forecast.predict()
 
