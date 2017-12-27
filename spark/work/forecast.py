@@ -20,32 +20,46 @@ class Forecast(object):
         else:
            self.model = SGDRegressor(random_state=42, eta0=0.01, alpha=0.001, penalty='l1')
 
+        cluster = Cluster([os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost')],
+                          port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
+                          )
+        self.session = cluster.connect(KEYSPACE_NAME)
+        self.session.row_factory = dict_factory
+
     def preprocess(self):
-        if self.type == "batch":
-            self.original_data = _load_data_from_cassandra()
-        feature_transformer = FeatureTransformer(data=self.original_data)
-        self.x, self.y = feature_transformer.perform()
+        original_data = self._load_data_from_cassandra(self.type)
+        feature_transformer = FeatureTransformer(data=original_data)
+        self.x, self.y, self.target_x = feature_transformer.perform()
 
     def fit(self):
         if self.x is not None and self.y is not None:
             self.model.partial_fit(self.x, self.y)
             with open(FORECAST_MODEL_PICKLE_PATH, mode='wb') as f:
-                pickle.dump(FORECAST_MODEL_PICKLE_PATH, f)
-            logging.critical(data)
+                pickle.dump(self.model, f)
 
-    def predict(self, targetX):
-        self.model.predict(targetX)
-        logging.critical("predict")
+    def predict(self):
+        if self.target_x is not None:
+            self.prediction_result = self.model.predict(self.target_x)
+            logging.critical("predict")
 
-    def _load_data_from_cassandra(self):
+    def save(self):
+        if self.prediction_result is not None:
+            self.session.execute("INSERT INTO users (id, location) VALUES (%s, %s)",
+                    (0, Address("123 Main St.", 78723)))
+
+    def _load_data_from_cassandra(self, type):
         session = cluster.connect(KEYSPACE_NAME)
-        session.row_factory = pandas_factory
+        session.row_factory = self._pandas_factory
         session.default_fetch_size = 10000000
+        sql = '' if type == 'batch' else ''
+
         rows = session.execute(sql)
         weather_data = rows._current_rows
-        target_column = 'target_temp'
-        data_columns = list(set(weather_data)) - [target_column]
-        return weather_data[data_columns], weather_data['target_temp']
+        return weather_data
+
+    def _pandas_factory(colnames, rows):
+        return pd.DataFrame(rows, columns=colnames)
+
 
 
 

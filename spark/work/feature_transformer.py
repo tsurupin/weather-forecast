@@ -25,17 +25,61 @@ class FeatureTransformer(object):
         unused_columns = unused_columns = ['snow_1h', 'snow_24h', 'rain_24h', 'rain_1h', 'snow_3h', 'rain_today', 'snow_today', 'weather_icon', 'weather_id', 'sea_level', 'grnd_level', 'lat', 'lon', 'city_id', 'city_name']
         used_columns = set(self.x.columns) - set(unused_columns)
         self.hour_diffs =  [1,2,3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48]
-        self.weather_description_columns = list(set(self.data['weather_description']))
-        self.weather_main_columns = list(set(self.data['weather_main']))
-
+        self.weather_description_columns = [
+            'light intensity drizzle',
+             'thunderstorm',
+             'scattered clouds',
+             'overcast clouds',
+             'smoke',
+             'mist',
+             'heavy intensity drizzle',
+             'moderate rain',
+             'thunderstorm with heavy rain',
+             'Sky is Clear',
+             'very heavy rain',
+             'light intensity shower rain',
+             'broken clouds',
+             'thunderstorm with light drizzle',
+             'drizzle',
+             'proximity thunderstorm with rain',
+             'shower rain',
+             'proximity thunderstorm with drizzle',
+             'SQUALLS',
+             'heavy snow',
+             'haze',
+             'heavy intensity rain',
+             'few clouds',
+             'thunderstorm with rain',
+             'proximity thunderstorm',
+             'light rain',
+             'sky is clear',
+             'light snow',
+             'thunderstorm with light rain',
+             'proximity shower rain',
+             'fog'
+        ]
+        self.weather_main_columns = [
+            'Thunderstorm',
+             'Squall',
+             'Snow',
+             'Mist',
+             'Rain',
+             'Smoke',
+             'Drizzle',
+             'Clear',
+             'Clouds',
+             'Haze',
+             'Fog'
+         ]
 
         self.data = self._cleanup_features(self.data, used_columns)
-        self.data = self._combine_previous_data(self.data)
+        self.data, self.test_data = self._combine_previous_data(self.data)
         self.data = self._convert_target_to_int(self.data)
         target_data = self.data['target_temp']
         self.data = self.data.drop(['target_temp'], axis=1)
         self.data = self._transform_with_pipelines(self.data)
-        return self.data, target_data
+        self.test_data = self._transform_with_pipelines(self.test_data)
+        return self.data, self.test_data
 
 
     def _cleanup_features(self, original_data, columns):
@@ -94,7 +138,7 @@ class FeatureTransformer(object):
 
 
     def _remove_previous_null_data(self, data):
-        return data[48:-1]
+        return data[48:-1], data[-1]
 
     def _add_new_data(self, data):
         data['dt_datetime'] =  pd.to_datetime(data['dt_iso'], format='%Y-%m-%d %H:%M:%S +%f %Z')

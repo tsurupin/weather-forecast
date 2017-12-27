@@ -13,7 +13,8 @@ from pyspark.sql import SQLContext, SparkSession, Row
 from pyspark.sql.types import *
 import logging
 import json
-
+from kafka import KafkaConsumer
+from time import sleep
 
 CASSANDRA_FORMAT = "org.apache.spark.sql.cassandra"
 TABLE_NAME = "raw_data"
@@ -22,11 +23,22 @@ TOPIC_NAME = "batch_processing"
 BOOTSTRAP_SERVER= "172.17.0.1:9092"
 
 class BatchProcess(object):
-    def _pandas_factory(colnames, rows):
-        return pd.DataFrame(rows, columns=colnames)
 
     def perform(self):
-        
+        consumer = KafkaConsumer(TOPIC_NAME, bootstrap_servers=[BOOTSTRAP_SERVER])
+
+        while True:
+            need_prediction = False
+            for msg in consumer:
+                if msg.value is not None:
+                    need_prediction = True
+            if need_prediction:
+                self._predict_weather()
+
+            sleep(300)
+
+        consumer.close()
+
 
         # get kafka consumer ValueError
         # predict forecast_on
@@ -51,24 +63,22 @@ class BatchProcess(object):
         # ssc.start()
         # ssc.awaitTermination()
 
-    def _predict_weather(self, sc):
-        # sqlContext = SQLContext(sc)
-        # raw_data = sqlContext.read.format(CASSANDRA_FORMAT).options(table=TABLE_NAME, keyspace= KEY_SPACE).load()
-        # self._update_forecast(raw_data)
-
+    def _predict_weather(self):
         from forecast import Forecast
         forecast = Forecast(type="batch")
         forecast.preprocess()
         forecast.fit()
-        _update_forecast(train_data, train_y)
+        prediction_result = forecast.predict()
+        princt('result: {}'.format(prediction_result))
+        forecast.save()
 
-
-    def _update_forecast(self, train_data, train_y):
-        from forecast import Forecast
-        forecast = Forecast()
-        forecast.perform(train_data, train_y)
-        # forecast.fit(train_data, train_y)
-        # forecast.predict()
+    #
+    # def _predict_weather_by_spark(self, sc):
+    #     sqlContext = SQLContext(sc)
+    #     raw_data = sqlContext.read.format(CASSANDRA_FORMAT).options(table=TABLE_NAME, keyspace= KEY_SPACE).load()
+    #     self._update_forecast(raw_data)
+    #
+    #
 
 if __name__ == '__main__':
     batch_process = BatchProcess()
