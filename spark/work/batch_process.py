@@ -24,37 +24,42 @@ BOOTSTRAP_SERVER= "172.17.0.1:9092"
 class BatchProcess(object):
     def _pandas_factory(colnames, rows):
         return pd.DataFrame(rows, columns=colnames)
-    def run(self):
+
+    def perform(self):
+        
+
+        # get kafka consumer ValueError
+        # predict forecast_on
+        # update forecast cassandra
 
 
 
 
-        conf = SparkConf(True).setMaster("local[*]").setAppName("jupyter pyspark").set("spark.cassandra.connection.host", "cassandra")
-        sc = SparkContext(conf=conf)
-        sc.setLogLevel("WARN")
 
-        ssc = StreamingContext(sc, 2)
-
-
-        weather_stream = KafkaUtils.createDirectStream(ssc, [TOPIC_NAME], {"metadata.broker.list": BOOTSTRAP_SERVER})
-        parsed =  weather_stream.map(lambda v: json.loads(v[1]))
-        if parsed.count() > 1:
-            self._predict_weather(sc)
-
-        ssc.start()
-        ssc.awaitTermination()
+        # conf = SparkConf(True).setMaster("local[*]").setAppName("jupyter pyspark").set("spark.cassandra.connection.host", "cassandra")
+        # sc = SparkContext(conf=conf)
+        # sc.setLogLevel("WARN")
+        #
+        # ssc = StreamingContext(sc, 2)
+        #
+        #
+        # weather_stream = KafkaUtils.createDirectStream(ssc, [TOPIC_NAME], {"metadata.broker.list": BOOTSTRAP_SERVER})
+        # parsed =  weather_stream.map(lambda v: json.loads(v[1]))
+        # if parsed.count() > 1:
+        #     self._predict_weather(sc)
+        #
+        # ssc.start()
+        # ssc.awaitTermination()
 
     def _predict_weather(self, sc):
         # sqlContext = SQLContext(sc)
         # raw_data = sqlContext.read.format(CASSANDRA_FORMAT).options(table=TABLE_NAME, keyspace= KEY_SPACE).load()
         # self._update_forecast(raw_data)
-        session = cluster.connect(KEYSPACE_NAME)
-        session.row_factory = pandas_factory
-        session.default_fetch_size = 10000000
-        rows = session.execute(sql)
-        data_frame = rows._current_rows
-        train_y = data_frame['target_temp']
-        train_data = data_frame.drop(['target_temp'], axis=1)
+
+        from forecast import Forecast
+        forecast = Forecast(type="batch")
+        forecast.preprocess()
+        forecast.fit()
         _update_forecast(train_data, train_y)
 
 
