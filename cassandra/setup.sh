@@ -6,13 +6,21 @@ echo "execute migration files"
 
 
 function run_migrations() {
-  files="/usr/local/* "
+  files="/usr/local/migrations/* "
   for f in $files; do
     case $f in
       *.cql) cqlsh -f $f
     esac
   done
-  exit 1
+}
+
+function create_seed_data() {
+  files="/usr/local/seeds/* "
+  for f in $files; do
+    case $f in
+      *.cql) cqlsh -f $f
+    esac
+  done
 }
 
 function print_error() {
@@ -21,3 +29,6 @@ function print_error() {
 }
 
 run_migrations || print_error
+echo "migration is done!"
+create_seed_data || print_error
+echo "seed_data creation is done"

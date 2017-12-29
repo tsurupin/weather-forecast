@@ -106,4 +106,4 @@ ENV/
 /metastore_db
 /web/app/static/dist/
 
-/spark/work/raw_data
+*.csv
