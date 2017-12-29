@@ -54,7 +54,7 @@ cassandra:
    CASSANDRA_BROADCAST_ADDRESS: '192.168.99.100'
  restart: always
  volumes:
-   - ./db/data/cassandra:/var/lib/cassandra
+   - ./data/cassandra:/var/lib/cassandra
 
 # stream:
 # #  build: ./spark
