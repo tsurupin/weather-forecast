@@ -27,72 +27,82 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared'))
 
 from config import *
 
+WAIT_TIME_IN_SECOND = 60
 class Streaming(object):
 
     def run(self):
-        sleep(15)
+        sleep(30)
+        #
+        # consumer = KafkaConsumer(
+        #     STREAMING_DATA_TOPIC_NAME,
+        #     value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+        #     bootstrap_servers=[BOOTSTRAP_SERVER]
+        # )
 
-        consumer = KafkaConsumer(
-            STREAMING_DATA_TOPIC_NAME,
-            value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-            bootstrap_servers=[BOOTSTRAP_SERVER]
-        )
-
-        logging.info("streaming gets consumer----------")
         while True:
             logging.critical("contineously reading data")
             need_prediction = False
-            for msg in consumer:
-                logging.critical("finaoyy got message-!!!!!!!!!!!!!!")
-                logging.critical(msg)
-                logging.critical(msg.value)
+            # for msg in consumer:
+            #     logging.critical("finaoyy got message-!!!!!!!!!!!!!!")
+            #     logging.critical(msg)
+            #     logging.critical(msg.value)
+            #
+            #     logging.info('streaming_data: {}'.format(msg))
+            #     need_prediction = True
 
-                logging.info('streaming_data: {}'.format(msg))
-                if msg.value is not None:
-
-                    need_prediction = True
-                # if need_prediction:
-                #     self._save(msg.value)
-                #     self._predict_weather()
+            data = {'pressure': 1014, 'sunset': 1514626582, 'city_id': 5391959, 'temperature': 298.15, 'dt': 1514635200, 'country_code': 'PH', 'condition_id': 803, 'longitude': 120.83, 'clouds_all': 75, 'condition': 'Clouds', 'sunrise': 1514586145, 'condition_details': 'broken clouds', 'latitude': 15.35, 'temperature_max': 298.15, 'wind_degree': 50, 'wind_speed': 2.1, 'humidity': 69, 'temperature_min': 298.15, 'city_name': 'San Francisco'}
+            self._save(data)
+            # if need_prediction:
+            #
+            #     #self._predict_weather()
             logging.info("load_data-------------")
-            sleep(60)
+            sleep(WAIT_TIME_IN_SECOND)
 
-        consumer.close()
+        #consumer.close()
 
     def _save(self, data):
-        {'condition': 'Clouds', 'temperature_min': 303.15, 'sunrise': 1514586140, 'wind_speed': 2.6, 'clouds_all': 75, 'city_name': 'San Francisco', 'temperature': 303.15, 'latitude': 15.35, 'humidity': 66, 'condition_id': 803, 'sunset': 1514626574, 'condition_details': 'broken clouds', 'longitude': 120.83, 'pressure': 1012, 'measured_at': 1514613600, 'country_code': 'PH', 'wind_degree': 30, 'temperature_max': 303.15}
         cluster = Cluster([os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost')],
                           port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
                           )
-        session = cluster.connect(KEYSPACE_NAME)
-        self.session.row_factory = dict_factory
+        session = None
+        logging.critical("before session")
+        while session is None:
+            try:
+                session = cluster.connect(KEYSPACE_NAME)
+            except Exception as e:
+                logging.error(e)
+                sleep(5)
+        logging.critical("session------")
+        logging.critical(session)
+        session.row_factory = dict_factory
         # need to think about uuid
-        self.session.execute('''
+        unix_datetime = None if data.get('dt') is None else datetime.datetime.fromtimestamp(data.get('dt'))
+        session.execute('''
         INSERT INTO raw_data (id, dt, dt_iso, measured_at, clouds_all, condition_id, condition_details, condition, city_name, city_id, temperature, temperature_max, temperature_min, rain_3h, snow_3h, wind_speed, wind_degree, humidity, pressure)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ''',
-            (
+        ''', (
                 str(uuid.uuid4()),
-                data['dt'],
-                datetime.datetime.fromtimestamp(data['dt_iso']),
-                datetime.datetime.fromtimestamp(data['dt_iso']),
-                data['clouds_all'],
-                data['condition_id'],
-                data['condition_details'],
-                data['condition'],
-                data['city_name'],
-                data['city_id'],
-                data['temperature'],
-                data['temperature_max'],
-                data['temperature_min'],
-                data['rain_3h'],
-                data['snow_3h'],
-                data['wind_speed'],
-                data['wind_degree'],
-                data['humidity'],
-                data['pressure']
+                data.get('dt'),
+                unix_datetime,
+                unix_datetime,
+                data.get('clouds_all'),
+                data.get('condition_id'),
+                data.get('condition_details'),
+                data.get('condition'),
+                data.get('city_name'),
+                data.get('city_id'),
+                data.get('temperature'),
+                data.get('temperature_max'),
+                data.get('temperature_min'),
+                data.get('rain_3h'),
+                data.get('snow_3h'),
+                data.get('wind_speed'),
+                data.get('wind_degree'),
+                data.get('humidity'),
+                data.get('pressure')
             )
         )
+        logging.critical("save is done!--------------")
 
     def _predict_weather(self):
         from forecast import Forecast

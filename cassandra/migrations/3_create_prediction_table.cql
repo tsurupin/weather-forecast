@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS weather_forecast.prediction
 (
-  id bigint,
+  id varchar,
   condition  text,
   forecast_on date,
   predicted_at timestamp,

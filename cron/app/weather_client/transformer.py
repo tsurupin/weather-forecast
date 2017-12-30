@@ -30,7 +30,7 @@ class Transformer(object):
             if key == "snow":
                 data["snow_3h"] = value["3h"]
             if key == "dt":
-                data["measured_at"] = value
+                data["dt"] = value
             if key == "sys":
                 data["country_code"] = value["country"]
                 data["sunrise"] = value["sunrise"]

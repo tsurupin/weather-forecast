@@ -38,7 +38,12 @@ def predictions_index():
     cluster = Cluster([os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost')],
                       port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
                       )
+    logging.critical(cluster)
+    logging.critical("app cluser loading-----")
     session = cluster.connect(KEYSPACE_NAME)
+
+    logging.critical(session)
+
     session.row_factory = dict_factory
 
     sql = """
