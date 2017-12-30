@@ -12,14 +12,16 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
 
     def __init__(self, attribute_names):
         self.attribute_names = attribute_names
+
     def fit(self, X, y=None):
         return self
+
     def transform(self, X):
         return X[self.attribute_names].values
 
 class FeatureTransformer(object):
     def __init__(slef, data):
-        self.data = data
+        self.train_data = data
 
     def perform(self):
         unused_columns = unused_columns = ['snow_1h', 'snow_24h', 'rain_24h', 'rain_1h', 'snow_3h', 'rain_today', 'snow_today', 'weather_icon', 'weather_id', 'sea_level', 'grnd_level', 'lat', 'lon', 'city_id', 'city_name']
@@ -72,14 +74,16 @@ class FeatureTransformer(object):
              'Fog'
          ]
 
-        self.data = self._cleanup_features(self.data, used_columns)
-        self.data, self.test_data = self._combine_previous_data(self.data)
-        self.data = self._convert_target_to_int(self.data)
-        target_data = self.data['target_temp']
-        self.data = self.data.drop(['target_temp'], axis=1)
-        self.data = self._transform_with_pipelines(self.data)
+        self.train_data = self._cleanup_features(self.train_data, used_columns)
+        self.train_data, self.test_data = self._combine_previous_data(self.train_data)
+        self.train_data = self._convert_target_to_int(self.train_data)
+        target_data = self.train_data['target_temp']
+        self.train_data = self.train_data.drop(['target_temp'], axis=1)
+        self.train_data = self._transform_with_pipelines(self.train_data)
+
         self.test_data = self._transform_with_pipelines(self.test_data)
-        return self.data, self.test_data
+
+        return self.train_data, target_data, self.test_data
 
 
     def _cleanup_features(self, original_data, columns):

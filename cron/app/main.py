@@ -3,7 +3,6 @@ from multiprocessing import Pool
 from scheduler.job import JobController
 from weather_client.client import WeatherClient
 
-logging.basicConfig(level=logging.DEBUG)
 
 weather_client = None
 @JobController.run("*/1 * * * *")
