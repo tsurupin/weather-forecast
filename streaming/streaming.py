@@ -15,8 +15,11 @@ import datetime
 import json
 from cassandra.cluster import Cluster
 from cassandra.query import ordered_dict_factory, dict_factory
+from kafka import KafkaConsumer
+#from forecast import Forecast
 from time import sleep
 import logging
+logging.basicConfig(level=logging.DEBUG)
 
 KEYSPACE_NAME = "weather_forecast"
 TABLE_NAME = "raw_data"
@@ -25,21 +28,22 @@ BOOTSTRAP_SERVER= "172.17.0.1"
 
 class Streaming(object):
 
-    def __init__(self):
-        self.consumer = KafkaConsumer(TOPIC_NAME, bootstrap_servers=[BOOTSTRAP_SERVER])
-
     def run(self):
+        sleep(15)
 
+        consumer = KafkaConsumer(TOPIC_NAME, bootstrap_servers=[BOOTSTRAP_SERVER])
+
+        logging.info("streaming gets consumer----------")
         while True:
             need_prediction = False
-            for msg in self.consumer:
+            for msg in consumer:
                 logging.info('streaming_data: {}'.format(msg))
                 if msg.value is not None:
                     need_prediction = True
             # if need_prediction:
             #     #self._save(msg.value)
             #     #self._predict_weather()
-
+            logging.info("load_data-------------")
             sleep(300)
 
         consumer.close()

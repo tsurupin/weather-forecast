@@ -1,0 +1,2 @@
+STREAMING_TOPIC_NAME = "streaming_data"
+BOOTSTRAP_SERVER = '172.17.0.1'

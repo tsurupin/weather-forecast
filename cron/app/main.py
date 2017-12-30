@@ -1,14 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# https://qiita.com/shinyorke/items/77cd54bc836227b2416a
 import logging
 from multiprocessing import Pool
 from scheduler.job import JobController
 from weather_client.client import WeatherClient
+
 logging.basicConfig(level=logging.DEBUG)
-TOPIC_NAME = "test"
-BOOTSTRAP_SERVER = '172.17.0.1'
-#
+
 weather_client = None
 @JobController.run("*/1 * * * *")
 def fetch_weather_data():
@@ -18,8 +14,7 @@ def fetch_weather_data():
             weather_client = WeatherClient()
         logging.critical("----------start fetching-------")
 
-
-        weather_client.run()
+        weather_client.request()
     except Exception as e:
         logging.error(e)
 
