@@ -1,30 +1,29 @@
 
 
 import os
-os.environ['PYSPARK_SUBMIT_ARGS'] = '\
---packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.2.0,com.datastax.spark:spark-cassandra-connector_2.11:2.0.1 \
-pyspark-shell'
-
-from pyspark import SparkConf, SparkContext
-from pyspark.streaming import StreamingContext
-from pyspark.streaming.kafka import KafkaUtils
-
-from pyspark.sql import SQLContext, SparkSession, Row
-from pyspark.sql.types import *
+# os.environ['PYSPARK_SUBMIT_ARGS'] = '\
+# --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.2.0,com.datastax.spark:spark-cassandra-connector_2.11:2.0.1 \
+# pyspark-shell'
+#
+# from pyspark import SparkConf, SparkContext
+# from pyspark.streaming import StreamingContext
+# from pyspark.streaming.kafka import KafkaUtils
+#
+# from pyspark.sql import SQLContext, SparkSession, Row
+# from pyspark.sql.types import *
 import logging
 import json
 from kafka import KafkaConsumer
 from time import sleep
 
-CASSANDRA_FORMAT = "org.apache.spark.sql.cassandra"
-TABLE_NAME = "raw_data"
-KEY_SPACE = "weather_forecast"
-TOPIC_NAME = "batch_processing"
-BOOTSTRAP_SERVER= "172.17.0.1:9092"
+# CASSANDRA_FORMAT = "org.apache.spark.sql.cassandra"
 
-class BatchProcess(object):
+TOPIC_NAME = "batch_data"
+BOOTSTRAP_SERVER= "172.17.0.1"
 
-    def perform(self):
+class Batch(object):
+
+    def run(self):
         consumer = KafkaConsumer(TOPIC_NAME, bootstrap_servers=[BOOTSTRAP_SERVER])
 
         while True:
@@ -81,5 +80,5 @@ class BatchProcess(object):
     #
 
 if __name__ == '__main__':
-    batch_process = BatchProcess()
-    batch_process.run()
+    batch = Batch()
+    batch.run()

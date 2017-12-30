@@ -11,10 +11,13 @@ class Transformer(object):
                 data["longitude"] = value['lon']
                 data["latitude"] = value['lat']
             if key == 'weather':
+                data["condition_id"] = value[0]["id"]
                 data["condition"] = value[0]["main"]
                 data["condition_details"] = value[0]["description"]
             if key == "main":
                 data["temperature"] = value["temp"]
+                data["temperature_max"] = value["temp_max"]
+                data["temperature_min"] = value["temp_min"]
                 data["pressure"] = value["pressure"]
                 data["humidity"] = value["humidity"]
             if key == "wind":
@@ -33,6 +36,6 @@ class Transformer(object):
                 data["sunrise"] = value["sunrise"]
                 data["sunset"] = value["sunset"]
             if key == "name":
-                data["city"] = value
+                data["city_name"] = value
 
         return data

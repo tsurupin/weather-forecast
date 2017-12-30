@@ -12,7 +12,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 KEYSPACE_NAME = "weather_forecast"
 TABLE_NAME = "prediction"
 BOOTSTRAP_SERVER = "172.17.0.1"
-TOPIC_NAME = "batch_processing"
+TOPIC_NAME = "batch_data"
 
 
 logging.basicConfig(level=logging.DEBUG)
