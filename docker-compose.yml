@@ -60,15 +60,15 @@ cassandra:
  volumes:
    - ./data/cassandra:/var/lib/cassandra
 
-streaming:
-  build: ./streaming
-  volumes:
-    - ./shared:/app/shared
-    - ./streaming/streaming.py:/app/streaming.py
-  links:
-    - cassandra
-  # #  - kafka
-  command: python app/streaming.py
+# streaming:
+#   build: ./streaming
+#   volumes:
+#     - ./shared:/app/shared
+#     - ./streaming/streaming.py:/app/streaming.py
+#   links:
+#     - cassandra
+#   # #  - kafka
+#   command: python app/streaming.py
 
 # spark_batch:
 #   image: jupyter/pyspark-notebook
@@ -83,6 +83,18 @@ streaming:
 #     - kafka
 #   command: "python /home/jovyan/work/batch.py"
 #
+# spark:
+#   image: jupyter/pyspark-notebook
+#   environment:
+#     - CASSANDRA_PORT=9042
+#     - CQL_VERSION=3.4.4
+#     - CASSANDRA_HOST=localhost
+#   volumes:
+#     - ./spark/work:/home/jovyan/work
+#   links:
+#     - cassandra
+
+
 
 
 #version: '3'

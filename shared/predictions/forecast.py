@@ -12,12 +12,13 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/../'))
 
 from config import *
 from time import sleep
+from datetime import datetime
 from cassandra.cluster import Cluster
 from cassandra.query import ordered_dict_factory
 from sklearn.linear_model import SGDRegressor
 from feature_transformer import FeatureTransformer
 SAN_FRANCISCO_CITY_NAME = 'san francisco'
-LOADING_DATA_NUM_FOR_STREAMING = 49
+LOADING_DATA_NUM_FOR_STREAMING = 50
 
 class Forecast(object):
     def __init__(self, type, original_data=None):
@@ -38,10 +39,10 @@ class Forecast(object):
 
     def preprocess(self):
         original_data = self._load_data_from_cassandra()
-        logging.critical("loaded original data")
-        logging.critical(original_data)
+
         feature_transformer = FeatureTransformer(data=original_data)
         self.x, self.y, self.target_x = feature_transformer.perform()
+        logging.critical('x={}, y={}, target_x={}'.format(self.x, self.y, self.target_x))
 
     def fit(self):
         if self.x is not None and self.y is not None:
@@ -52,12 +53,14 @@ class Forecast(object):
     def predict(self):
         if self.target_x is not None:
             self.prediction_result = self.model.predict(self.target_x)
-            logging.critical("predict")
+            logging.critical('predict: {}'.format(self.prediction_result))
 
     def save(self):
         if self.prediction_result is not None:
-            self.session.execute("INSERT INTO %s (id, location) VALUES (%s, %s)",
-                    (PREDICTION_TABLE_NAME, 0, Address("123 Main St.", 78723)))
+            self.session.execute('''
+            INSERT INTO {} (city_name, version, predicted_at, forecast_on)
+            VALUES (%s, %s, %s, %s)
+            '''.format(PREDICTION_TABLE_NAME), (SAN_FRANCISCO_CITY_NAME, datetime.now(), ))
 
     def _load_data_from_cassandra(self):
         self.session = self._load_cassandra_session()
@@ -65,7 +68,6 @@ class Forecast(object):
         self.session.default_fetch_size = None #10000000
         sql = "SELECT * FROM {0} where city_name = '{1}'".format(RAW_DATA_TABLE_NAME, SAN_FRANCISCO_CITY_NAME)
         sql += ' LIMIT {}'.format(LOADING_DATA_NUM_FOR_STREAMING) if self.type == 'streaming' else ''
-        logging.critical(sql)
         rows = self.session.execute(sql)
         weather_data = rows._current_rows
         return weather_data
