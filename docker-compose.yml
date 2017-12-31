@@ -1,29 +1,3 @@
-app:
- build: ./web
- ports:
-  - "8000:5000"
- links:
-  - cassandra
-  #- kafka
- volumes:
-   - ./web:/web
-   - ./shared:/web/app/shared
- command: python /web/app/app.py
-
-#
-# cron:
-#  build: ./cron
-#  volumes:
-#    - ./cron:/cron
-#    - ./shared:/cron/app/shared
-#  links:
-#    - kafka
-#  env_file:
-#    - .env
-#  environment:
-#    - WEATHER_API_TOKEN=${WEATHER_API_TOKEN}
-#  command: python /cron/app/main.py
-
 zookeeper:
  image: wurstmeister/zookeeper
  ports:
@@ -40,7 +14,7 @@ kafka:
    KAFKA_ADVERTISED_PORT: "9092"
    KAFKA_BROKER_ID: 1
    KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-   KAFKA_CREATE_TOPICS: "streaming:1:1,batch:1:1"
+   KAFKA_CREATE_TOPICS: "streaming_data:1:1,batch_data:1:1"
 
 cassandra:
  build: ./cassandra
@@ -56,15 +30,41 @@ cassandra:
  volumes:
    - ./data/cassandra:/var/lib/cassandra
 
-# streaming:
-#   build: ./streaming
-#   volumes:
-#     - ./shared:/app/shared
-#     - ./streaming/streaming.py:/app/streaming.py
-#   links:
-#     - cassandra
-#     - kafka
-#   command: python app/streaming.py
+app:
+ build: ./web
+ ports:
+  - "8000:5000"
+ links:
+  - cassandra
+  - kafka
+ volumes:
+   - ./web:/web
+   - ./shared:/web/app/shared
+ command: python /web/app/app.py
+
+cron:
+ build: ./cron
+ volumes:
+   - ./cron:/cron
+   - ./shared:/cron/app/shared
+ links:
+   - kafka
+ env_file:
+   - .env
+ environment:
+   - WEATHER_API_TOKEN=${WEATHER_API_TOKEN}
+ command: python /cron/app/main.py
+
+
+streaming:
+  build: ./streaming
+  volumes:
+    - ./shared:/app/shared
+    - ./streaming/streaming.py:/app/streaming.py
+  links:
+    - cassandra
+    - kafka
+  command: python app/streaming.py
 
 batch:
   build: ./batch
