@@ -19,7 +19,7 @@ from sklearn.linear_model import SGDRegressor
 from feature_transformer import FeatureTransformer
 SAN_FRANCISCO_CITY_NAME = 'san francisco'
 LOADING_DATA_NUM_FOR_STREAMING = 50
-
+TEMPERATURE_FORECAST_MODEL_PICKLE_ABS_PATH = os.path.abspath(os.path.dirname(__file__) + '/' + TEMPERATURE_FORECAST_MODEL_PICKLE_PATH)
 class Forecast(object):
     def __init__(self, type, original_data=None):
         self.type = type;
@@ -30,12 +30,11 @@ class Forecast(object):
         self.session = None
         self.prediction_result = None
 
-        if type == "streaming" and os.path.exists(TEMPERATURE_FORECAST_MODEL_PICKLE_PATH) and os.path.getsize(TEMPERATURE_FORECAST_MODEL_PICKLE_PATH) > 0:
-            with open(TEMPERATURE_FORECAST_MODEL_PICKLE_PATH, mode='rb') as f:
+        if type == "streaming" and os.path.exists(TEMPERATURE_FORECAST_MODEL_PICKLE_ABS_PATH) and os.path.getsize(TEMPERATURE_FORECAST_MODEL_PICKLE_ABS_PATH) > 0:
+            with open(TEMPERATURE_FORECAST_MODEL_PICKLE_ABS_PATH, mode='rb') as f:
                 self.model = pickle.load(f)
         else:
            self.model = SGDRegressor(random_state=42, eta0=0.01, alpha=0.001, penalty='l1')
-
 
     def preprocess(self):
         original_data = self._load_data_from_cassandra()
@@ -47,7 +46,7 @@ class Forecast(object):
     def fit(self):
         if self.x is not None and self.y is not None:
             self.model.partial_fit(self.x, self.y)
-            with open(TEMPERATURE_FORECAST_MODEL_PICKLE_PATH, mode='wb') as f:
+            with open(TEMPERATURE_FORECAST_MODEL_PICKLE_ABS_PATH, mode='wb') as f:
                 pickle.dump(self.model, f)
 
     def predict(self):
