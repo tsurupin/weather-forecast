@@ -34,7 +34,7 @@ class Streaming(object):
 
     def run(self):
         sleep(30)
-        logging.critical("wake up-!!!!!!!!!!!!!!")
+
         consumer = self._load_kafka_consumer()
         self._consume_message(consumer)
 

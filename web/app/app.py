@@ -3,7 +3,7 @@ import sys
 import datetime
 from flask import Flask, jsonify, redirect, url_for, Response, send_file
 from cassandra.cluster import Cluster
-from cassandra.query import ordered_dict_factory
+from cassandra.query import dict_factory
 from kafka import KafkaProducer
 import json
 import logging
@@ -16,9 +16,8 @@ KEYSPACE_NAME = 'weather_forecast'
 PREDICTION_TABLE_NAME = 'prediction'
 BOOTSTRAP_SERVER = '172.17.0.1'
 BATCH_DATA_TOPIC_NAME = 'batch'
+SAN_FRANCISCO_CITY_NAME = 'san francisco'
 
-
-logging.basicConfig(level=logging.DEBUG)
 
 @app.after_request
 def add_header(response):
@@ -45,29 +44,34 @@ def predictions_index():
 
     logging.critical(session)
 
-    session.row_factory = ordered_dict_factory
+    session.row_factory = dict_factory
+    forecast = None
+
+    rows = session.execute('SELECT DISTINCT version, city_name FROM {}'.format(PREDICTION_TABLE_NAME))
+
+    latest_version = 0
+    for row in rows._current_rows:
+        if latest_version < row['version']:
+            latest_version = row['version']
 
     sql = """
         SELECT city_name, forecast_at, temperature
         FROM {}
-
-        --WHERE city = 'san francisco'
-        --WHERE city = %s
-        -- AND predicted_at > %s
-        -- ALLOW FILTERING
+        WHERE version = %s
+        AND city_name = %s
+        LIMIT 1
     """.format(PREDICTION_TABLE_NAME)
 
     #today_timestamp = int(float(datetime.date.today().strftime("%s.%f"))) * 1000
 
-    city = 'san francisco'
-    forecast_data = session.execute(sql)
-
+    forecast_data = session.execute(sql, (latest_version, SAN_FRANCISCO_CITY_NAME))
+    logging.critical(forecast_data)
     forecast = list(forecast_data)
+
     return jsonify(predictions=forecast)
 
 @app.route("/api/v1/predictions", methods=['POST'])
 def predictions_create():
-    logging.critical("predictions create called!!")
     try:
         kafka = KafkaProducer(bootstrap_servers=[BOOTSTRAP_SERVER])
         kafka.send(BATCH_DATA_TOPIC_NAME, b'bulk_processing')

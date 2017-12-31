@@ -14,7 +14,7 @@ const PredictionTable = ({predictions}) => {
   return (
       <Wrapper>
         <Thead>
-          {renderListComponent('day', predictions)}
+          {renderListComponent('forecast_at', predictions)}
         </Thead>
         <Tbody>
           {renderList(predictions)}
@@ -24,7 +24,7 @@ const PredictionTable = ({predictions}) => {
 }
 
 
-const listNames = ['condition', 'precipitation_percent'];
+const listNames = ['city_name', 'temperature'];
 
 function renderList(predictions) {
   return listNames.map((keyName) => {

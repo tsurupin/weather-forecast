@@ -20,7 +20,6 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
 class FeatureTransformer(object):
     def __init__(self, data):
         self.data = data
-        logging.critical(data)
 
     def perform(self):
         unused_columns = ['id', 'snow_1h', 'snow_24h', 'rain_24h', 'rain_1h','rain_today', 'snow_today', 'weather_icon', 'weather_id', 'condition_id', 'measured_at', 'sea_level', 'grnd_level', 'lat', 'lon', 'city_id', 'city_name']
@@ -75,16 +74,15 @@ class FeatureTransformer(object):
 
         self.data = self._cleanup_features(self.data, used_columns)
         self.data, test_data = self._combine_previous_data(self.data)
-        logging.critical("combine----")
-        logging.critical(self.data)
-        logging.critical(test_data)
 
+        logging.critical("cleanup----")
         self.data = self._convert_target_to_int(self.data)
         logging.critical("convert----")
-        logging.critical(self.data)
+        # logging.critical(self.data)
         target_data = self.data['target_temperature']
         self.data = self.data.drop(['target_temperature'], axis=1)
         self.data = self._transform_with_pipelines(self.data)
+        logging.critical("tansform----")
         test_data = test_data.drop(['target_temperature'], axis=1)
         forecast_at = list(test_data.dt)[-1]
         test_data = self._transform_with_pipelines(test_data)
@@ -99,7 +97,9 @@ class FeatureTransformer(object):
         data['snow_3h'] = data['snow_3h'].fillna(0)
         data.drop_duplicates('dt', inplace=True)
         data = self._add_new_data(data)
+        logging.critical("add_new_feature--------")
         data = data.apply(self._transform_datetime, axis=1)
+        logging.critical("tansform_datetime--------")
         unused_columns  = ['dt_iso', 'condition', 'condition_details', 'dt_datetime']
         data = data.drop(unused_columns, axis=1)
         data = data.reset_index(drop=True)

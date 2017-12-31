@@ -8,7 +8,7 @@ app:
   - "8000:5000"
  links:
   - cassandra
-  - kafka
+  #- kafka
  volumes:
    - ./web:/web
    - ./shared:/web/app/shared
@@ -28,25 +28,25 @@ app:
 #    - WEATHER_API_TOKEN=${WEATHER_API_TOKEN}
 #  command: python /cron/app/main.py
 
-zookeeper:
- image: wurstmeister/zookeeper
- ports:
-   - "2181:2181"
-
-kafka:
- image: wurstmeister/kafka
- ports:
-   - "9092:9092"
- links:
-   - zookeeper
- environment:
-   KAFKA_ADVERTISED_HOST_NAME: "172.17.0.1" # docker-machine ssh dev; ifconfig docker0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
-   KAFKA_ADVERTISED_PORT: "9092"
-   KAFKA_BROKER_ID: 1
-   KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-   KAFKA_CREATE_TOPICS: "streaming:1:1,batch:1:1"
- # volumes:
- #   - /var/run/docker.sock:/var/run/docker.sock
+# zookeeper:
+#  image: wurstmeister/zookeeper
+#  ports:
+#    - "2181:2181"
+#
+# kafka:
+#  image: wurstmeister/kafka
+#  ports:
+#    - "9092:9092"
+#  links:
+#    - zookeeper
+#  environment:
+#    KAFKA_ADVERTISED_HOST_NAME: "172.17.0.1" # docker-machine ssh dev; ifconfig docker0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
+#    KAFKA_ADVERTISED_PORT: "9092"
+#    KAFKA_BROKER_ID: 1
+#    KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#    KAFKA_CREATE_TOPICS: "streaming:1:1,batch:1:1"
+#  volumes:
+#    - /var/run/docker.sock:/var/run/docker.sock
 
 cassandra:
  build: ./cassandra
@@ -72,15 +72,15 @@ cassandra:
 #     - kafka
 #   command: python app/streaming.py
 
-spark_batch:
-  build: ./batch
-  volumes:
-    - ./shared:/app/shared
-    - ./batch/batch.py:/app/batch.py
-  links:
-    - cassandra
-    - kafka
-  command: python app/batch.py
+# spark_batch:
+#   build: ./batch
+#   volumes:
+#     - ./shared:/app/shared
+#     - ./batch/batch.py:/app/batch.py
+#   links:
+#     - cassandra
+#     #- kafka
+#   command: python app/batch.py
 
 # spark:
 #   image: jupyter/pyspark-notebook

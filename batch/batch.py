@@ -17,28 +17,26 @@ from forecast import Forecast
 class Batch(object):
 
     def run(self):
-        sleep(30)
-        consumer = self._load_kafka_consumer()
-        self._consume_message(consumer)
-        logging.critical("consumer gets close")
-        consumer.close()
+        while True:
+            self._predict_weather()
+            sleep(300)
+        #sleep(30)
+
+        # consumer = self._load_kafka_consumer()
+        # self._consume_message(consumer)
+        # logging.critical("consumer gets close")
+        # consumer.close()
 
     def _consume_message(self, consumer):
-        logging.critical('consumer: {}'.format(consumer))
-        logging.critical(consumer.metrics())
-        try:
-            for msg in consumer:
-                logging.critical("finaoyy got message-!!!!!!!!!!!!!!")
-                logging.critical(msg)
-                logging.critical(msg.value)
+        for msg in consumer:
+            logging.critical("finaoyy got message-!!!!!!!!!!!!!!")
+            logging.critical(msg)
+            logging.critical(msg.value)
 
-                logging.critical('batch_data: {}'.format(msg))
+            logging.critical('batch_data: {}'.format(msg))
 
-                self._predict_weather()
-                logging.critical("load_data-------------")
-        except Exception as e:
-            logging.error('consumer error: {}'.format(e))
-
+            self._predict_weather()
+            logging.critical("load_data-------------")
 
     def _predict_weather(self):
         from forecast import Forecast
