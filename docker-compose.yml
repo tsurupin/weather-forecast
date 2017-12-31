@@ -32,6 +32,7 @@ zookeeper:
  image: wurstmeister/zookeeper
  ports:
    - "2181:2181"
+
 kafka:
  image: wurstmeister/kafka
  ports:
@@ -44,8 +45,8 @@ kafka:
    KAFKA_BROKER_ID: 1
    KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
    KAFKA_CREATE_TOPICS: "streaming:1:1,batch:1:1"
- volumes:
-   - /var/run/docker.sock:/var/run/docker.sock
+ # volumes:
+ #   - /var/run/docker.sock:/var/run/docker.sock
 
 cassandra:
  build: ./cassandra

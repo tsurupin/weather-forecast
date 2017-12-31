@@ -12,17 +12,16 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared'))
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-KEYSPACE_NAME = "weather_forecast"
-TABLE_NAME = "prediction"
-BOOTSTRAP_SERVER = "172.17.0.1"
-BATCH_DATA_TOPIC_NAME = "batch_data"
+KEYSPACE_NAME = 'weather_forecast'
+PREDICTION_TABLE_NAME = 'prediction'
+BOOTSTRAP_SERVER = '172.17.0.1'
+BATCH_DATA_TOPIC_NAME = 'batch'
 
 
 logging.basicConfig(level=logging.DEBUG)
 
 @app.after_request
 def add_header(response):
-    # response.cache_control.no_store = True
     if 'Cache-Control' not in response.headers:
         response.headers['Cache-Control'] = 'no-store'
     return response
@@ -36,7 +35,6 @@ def index():
 
 @app.route("/api/v1/predictions", methods=['GET'])
 def predictions_index():
-    #global session
     logging.critical("predictions loading!!!")
     cluster = Cluster([os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost')],
                       port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
@@ -73,7 +71,8 @@ def predictions_create():
     try:
         kafka = KafkaProducer(bootstrap_servers=[BOOTSTRAP_SERVER])
         kafka.send(BATCH_DATA_TOPIC_NAME, b'bulk_processing')
-        logging.info("send bulk_processing event!!")
+        kafka.flush(10)
+        logging.critical("send bulk_processing event!!")
         return Response(status=201, mimetype='application/json')
     except Exception as error:
         logging.error(error)

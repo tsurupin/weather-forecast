@@ -22,7 +22,7 @@ from kafka import KafkaConsumer
 
 from time import sleep
 import logging
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared'))
 from config import *
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared/predictions'))
@@ -35,13 +35,9 @@ class Streaming(object):
     def run(self):
         sleep(30)
         logging.critical("wake up-!!!!!!!!!!!!!!")
-        consumer = KafkaConsumer(
-            STREAMING_DATA_TOPIC_NAME,
-            value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-            bootstrap_servers=[BOOTSTRAP_SERVER]
-        )
+        consumer = self._load_kafka_consumer()
         self._consume_message(consumer)
-        logging.critical("consumer gets close")
+
         consumer.close()
 
     def _consume_message(self, consumer):
@@ -52,7 +48,6 @@ class Streaming(object):
 
             logging.critical('streaming_data: {}'.format(msg))
 
-            #data = {'pressure': 1014, 'sunset': 1514626582, 'city_id': 5391959, 'temperature': 298.15, 'dt': 1514635200, 'country_code': 'PH', 'condition_id': 803, 'longitude': 120.83, 'clouds_all': 75, 'condition': 'Clouds', 'sunrise': 1514586145, 'condition_details': 'broken clouds', 'latitude': 15.35, 'temperature_max': 298.15, 'wind_degree': 50, 'wind_speed': 2.1, 'humidity': 69, 'temperature_min': 298.15, 'city_name': 'San Francisco'}
             self._save(msg.value)
 
             self._predict_weather()
@@ -60,7 +55,7 @@ class Streaming(object):
 
     def _save(self, data):
 
-        session = self._load_data_from_cassandra()
+        session = self._load_cassandra_session()
 
         session.row_factory = ordered_dict_factory
         unix_datetime = None if data.get('dt') is None else datetime.datetime.fromtimestamp(data.get('dt'))

@@ -9,38 +9,35 @@ from kafka import KafkaConsumer
 
 from time import sleep
 import logging
-logging.basicConfig(level=logging.DEBUG)
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared'))
 from config import *
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared/predictions'))
 from forecast import Forecast
 
-WAIT_TIME_IN_SECOND = 60
-
 class Batch(object):
 
     def run(self):
         sleep(30)
-        logging.critical("wake up-!!!!!!!!!!!!!!")
-        consumer = KafkaConsumer(
-            BATCH_DATA_TOPIC_NAME,
-            value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-            bootstrap_servers=[BOOTSTRAP_SERVER]
-        )
+        consumer = self._load_kafka_consumer()
         self._consume_message(consumer)
         logging.critical("consumer gets close")
         consumer.close()
 
     def _consume_message(self, consumer):
-        for msg in consumer:
-            logging.critical("finaoyy got message-!!!!!!!!!!!!!!")
-            logging.critical(msg)
-            logging.critical(msg.value)
+        logging.critical('consumer: {}'.format(consumer))
+        logging.critical(consumer.metrics())
+        try:
+            for msg in consumer:
+                logging.critical("finaoyy got message-!!!!!!!!!!!!!!")
+                logging.critical(msg)
+                logging.critical(msg.value)
 
-            logging.critical('batch_data: {}'.format(msg))
+                logging.critical('batch_data: {}'.format(msg))
 
-            self._predict_weather()
-            logging.critical("load_data-------------")
+                self._predict_weather()
+                logging.critical("load_data-------------")
+        except Exception as e:
+            logging.error('consumer error: {}'.format(e))
 
 
     def _predict_weather(self):
@@ -51,20 +48,19 @@ class Batch(object):
         prediction = forecast.predict()
         logging.critical('result: {}'.format(prediction))
         forecast.save()
-    #
-    # def _load_kafka_consumer(self):
-    #     consumer = None
-    #     while consumer is None:
-    #         try:
-    #             consumer = KafkaConsumer(
-    #                 STREAMING_DATA_TOPIC_NAME,
-    #                 value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-    #                 bootstrap_servers=[BOOTSTRAP_SERVER]
-    #             )
-    #             return consumer
-    #         except Exception as e:
-    #             logging.critical(e)
-    #             sleep(5)
+
+    def _load_kafka_consumer(self):
+        consumer = None
+        while consumer is None:
+            try:
+                consumer = KafkaConsumer(
+                    BATCH_DATA_TOPIC_NAME,
+                    bootstrap_servers=[BOOTSTRAP_SERVER]
+                )
+                return consumer
+            except Exception as e:
+                logging.critical(e)
+                sleep(5)
 
 
 if __name__ == '__main__':
