@@ -1,3 +1,7 @@
+CITY_ID_TABLE = {
+    'San Francisco': 5391959
+}
+
 class Transformer(object):
     def __init__(self, raw_data):
         self._raw_data = raw_data
@@ -37,5 +41,6 @@ class Transformer(object):
                 data["sunset"] = value["sunset"]
             if key == "name":
                 data["city_name"] = value
+                data['city_id'] = CITY_ID_TABLE[value]
 
         return data

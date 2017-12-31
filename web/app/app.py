@@ -3,7 +3,7 @@ import sys
 import datetime
 from flask import Flask, jsonify, redirect, url_for, Response, send_file
 from cassandra.cluster import Cluster
-from cassandra.query import ordered_dict_factory, dict_factory
+from cassandra.query import ordered_dict_factory
 from kafka import KafkaProducer
 import json
 import logging
@@ -12,10 +12,10 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared'))
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-# KEYSPACE_NAME = "weather_forecast"
-# TABLE_NAME = "prediction"
-# BOOTSTRAP_SERVER = "172.17.0.1"
-# TOPIC_NAME = "batch_data"
+KEYSPACE_NAME = "weather_forecast"
+TABLE_NAME = "prediction"
+BOOTSTRAP_SERVER = "172.17.0.1"
+BATCH_DATA_TOPIC_NAME = "batch_data"
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -47,21 +47,22 @@ def predictions_index():
 
     logging.critical(session)
 
-    session.row_factory = dict_factory
+    session.row_factory = ordered_dict_factory
 
     sql = """
-        SELECT city, condition, prediction_percent, rain_3h, snow_3h
-        FROM %s
+        SELECT city_name, forecast_at, temperature
+        FROM {}
+
         --WHERE city = 'san francisco'
         --WHERE city = %s
         -- AND predicted_at > %s
         -- ALLOW FILTERING
-    """
+    """.format(PREDICTION_TABLE_NAME)
 
     #today_timestamp = int(float(datetime.date.today().strftime("%s.%f"))) * 1000
 
     city = 'san francisco'
-    forecast_data = session.execute(sql, (PREDICTION_TABLE_NAME))
+    forecast_data = session.execute(sql)
 
     forecast = list(forecast_data)
     return jsonify(predictions=forecast)

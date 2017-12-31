@@ -6,11 +6,12 @@ MAINTAINER TOMOAKI TSURUTA
 RUN pip install -U pip
 
 ADD requirements.txt app/requirements.txt
-COPY ./app /app
+COPY ./app/static /app/static
+COPY ./app/app.py /app/app.py
 
-WORKDIR /app
+#WORKDIR /app
 
-RUN pip install -r requirements.txt
+RUN pip install -r app/requirements.txt
 EXPOSE 5000
 
 #FROM tiangolo/uwsgi-nginx-flask:python3.6-index

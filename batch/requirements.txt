@@ -1,2 +1,6 @@
+numpy
+scipy
+pandas
+scikit-learn
 kafka-python==1.3.5
 cassandra-driver==3.12.0

@@ -1,9 +1,7 @@
-FROM python:3.5.0-slim
+FROM python:latest
 
 MAINTAINER TOMOAKI TSURUTA
 
-COPY ./app /app
 ADD requirements.txt /app/
 
-WORKDIR /app
-RUN pip install -r requirements.txt
+RUN pip install -r /app/requirements.txt

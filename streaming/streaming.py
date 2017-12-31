@@ -22,44 +22,41 @@ from kafka import KafkaConsumer
 
 from time import sleep
 import logging
-#logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared'))
 from config import *
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared/predictions'))
 from forecast import Forecast
 
 WAIT_TIME_IN_SECOND = 60
+
 class Streaming(object):
 
     def run(self):
-        #sleep(30)
-        #
-        # consumer = KafkaConsumer(
-        #     STREAMING_DATA_TOPIC_NAME,
-        #     value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-        #     bootstrap_servers=[BOOTSTRAP_SERVER]
-        # )
+        sleep(30)
+        logging.critical("wake up-!!!!!!!!!!!!!!")
+        consumer = KafkaConsumer(
+            STREAMING_DATA_TOPIC_NAME,
+            value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+            bootstrap_servers=[BOOTSTRAP_SERVER]
+        )
+        self._consume_message(consumer)
+        logging.critical("consumer gets close")
+        consumer.close()
 
-        while True:
-            logging.critical("contineously reading data")
-            need_prediction = False
-            # for msg in consumer:
-            #     logging.critical("finaoyy got message-!!!!!!!!!!!!!!")
-            #     logging.critical(msg)
-            #     logging.critical(msg.value)
-            #
-            #     logging.info('streaming_data: {}'.format(msg))
-            #     need_prediction = True
+    def _consume_message(self, consumer):
+        for msg in consumer:
+            logging.critical("finaoyy got message-!!!!!!!!!!!!!!")
+            logging.critical(msg)
+            logging.critical(msg.value)
+
+            logging.critical('streaming_data: {}'.format(msg))
 
             #data = {'pressure': 1014, 'sunset': 1514626582, 'city_id': 5391959, 'temperature': 298.15, 'dt': 1514635200, 'country_code': 'PH', 'condition_id': 803, 'longitude': 120.83, 'clouds_all': 75, 'condition': 'Clouds', 'sunrise': 1514586145, 'condition_details': 'broken clouds', 'latitude': 15.35, 'temperature_max': 298.15, 'wind_degree': 50, 'wind_speed': 2.1, 'humidity': 69, 'temperature_min': 298.15, 'city_name': 'San Francisco'}
-            #self._save(data)
-            #if need_prediction:
+            self._save(msg.value)
 
             self._predict_weather()
-            logging.info("load_data-------------")
-            sleep(WAIT_TIME_IN_SECOND)
-
-        #consumer.close()
+            logging.critical("load_data-------------")
 
     def _save(self, data):
 
@@ -103,7 +100,22 @@ class Streaming(object):
         logging.critical('result: {}'.format(prediction))
         forecast.save()
 
+    def _load_kafka_consumer(self):
+        consumer = None
+        while consumer is None:
+            try:
+                consumer = KafkaConsumer(
+                    STREAMING_DATA_TOPIC_NAME,
+                    value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+                    bootstrap_servers=[BOOTSTRAP_SERVER]
+                )
+                return consumer
+            except Exception as e:
+                logging.critical(e)
+                sleep(5)
+
     def _load_cassandra_session(self):
+        session = None
         while session is None:
             try:
                 cluster = Cluster([os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost')],
@@ -116,94 +128,6 @@ class Streaming(object):
                 sleep(5)
 
 
-
-
-
-    # def _save(self, rdd):
-    #     if rdd.count() > 0:
-    #         # NOTE: this should be alphabetical order
-    #         schema = self._get_schema()
-    #
-    #         spark = self._get_spark_session_instance(rdd.context.getConf())
-    #
-    #         named_rdd = rdd.map(self._convert_to_row)
-    #         stream_df = spark.createDataFrame(named_rdd, schema)
-    #         stream_df.show()
-    #         stream_df.write \
-    #             .format(CASSANDRA_FORMAT) \
-    #             .mode('append') \
-    #             .options(table=TABLE_NAME, keyspace=KEY_SPACE) \
-    #             .save()
-
-    #
-    # def _update_forecast(self, data):
-    #
-    #     if data.count() is not None:
-    #         from forecast import Forecast
-    #         logging.critical("-----update_forecast")
-    #         forecast = Forecast(type="streaming")
-    #         forecast.fit(data)
-    #         forecast.predict()
-    #
-    # def _get_schema(self):
-    #     return StructType([
-    #         StructField("city", StringType(), True),
-    #         StructField("clouds_all", IntegerType()),
-    #         StructField("condition", StringType(), True),
-    #         StructField("condition_details", StringType(), True),
-    #         StructField("humidity", IntegerType(), True),
-    #         StructField("latitude", FloatType(), True),
-    #         StructField("longitude", FloatType(), True),
-    #         StructField("measured_at", TimestampType(), True),
-    #         StructField("pressure", IntegerType(), True),
-    #         StructField("rain_3h", IntegerType()),
-    #         StructField("snow_3h", IntegerType()),
-    #         StructField("sunrise", TimestampType(), True),
-    #         StructField("sunset", TimestampType(), True),
-    #         StructField("temperature", FloatType(), True),
-    #         StructField("wind_degree", IntegerType()),
-    #         StructField("wind_speed", FloatType())
-    #     ])
-    #
-    # def _get_spark_session_instance(self, spark_conf):
-    #     if ("sparkSessionSingletonInstance" not in globals()):
-    #         globals()["sparkSessionSingletonInstance"] = SparkSession \
-    #             .builder \
-    #             .config(conf=spark_conf) \
-    #             .getOrCreate()
-    #     return globals()["sparkSessionSingletonInstance"]
-
-
-
-
-    # def _convert_to_row(self, c):
-    #     # NOTE: this should be alphabetical order
-    #     return Row(
-    #         city=c.get("city"),
-    #         condition=c.get("condition"),
-    #         clouds_all=c.get("clouds_all"),
-    #         condition_details=c.get("condition_details"),
-    #         humidity=c.get("humidity"),
-    #         latitude=c.get("latitude"),
-    #         longitude=c.get("longitude"),
-    #         measured_at=datetime.datetime.fromtimestamp(int(c["measured_at"])),
-    #         pressure=c.get("pressure"),
-    #         rain_3h=c.get("rain_3h"),
-    #         snow_3h=c.get("snow_3h"),
-    #         sunrise=datetime.datetime.fromtimestamp(int(c["sunrise"])),
-    #         sunset=datetime.datetime.fromtimestamp(int(c["sunset"])),
-    #         temperature=c.get("temperature"),
-    #         wind_degree=c.get("wind_degree"),
-    #         wind_speed=c.get("wind_speed")
-    #
-    #     )
-        # fetch prediction
-        # fetch last week weather
-        # online learning
-        # city, condition, predictid percent, rain_3h, snow_3h
-
-
-#
 if __name__ == '__main__':
     streaming = Streaming()
     streaming.run()
