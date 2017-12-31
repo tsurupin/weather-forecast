@@ -107,3 +107,4 @@ ENV/
 /web/app/static/dist/
 
 *.csv
+*.pickle

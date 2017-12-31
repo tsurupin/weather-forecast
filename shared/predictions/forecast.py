@@ -30,8 +30,8 @@ class Forecast(object):
         self.session = None
         self.prediction_result = None
 
-        if type == "streaming" and os.path.exists(FORECAST_MODEL_PICKLE_PATH):
-            with open(FORECAST_MODEL_PICKLE_PATH, mode='rb') as f:
+        if type == "streaming" and os.path.exists(TEMPERATURE_FORECAST_MODEL_PICKLE_PATH) and os.path.getsize(TEMPERATURE_FORECAST_MODEL_PICKLE_PATH) > 0:
+            with open(TEMPERATURE_FORECAST_MODEL_PICKLE_PATH, mode='rb') as f:
                 self.model = pickle.load(f)
         else:
            self.model = SGDRegressor(random_state=42, eta0=0.01, alpha=0.001, penalty='l1')
@@ -47,7 +47,7 @@ class Forecast(object):
     def fit(self):
         if self.x is not None and self.y is not None:
             self.model.partial_fit(self.x, self.y)
-            with open(FORECAST_MODEL_PICKLE_PATH, mode='wb') as f:
+            with open(TEMPERATURE_FORECAST_MODEL_PICKLE_PATH, mode='wb') as f:
                 pickle.dump(self.model, f)
 
     def predict(self):
