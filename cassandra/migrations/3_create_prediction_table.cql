@@ -1,10 +1,9 @@
 CREATE TABLE IF NOT EXISTS weather_forecast.prediction
 (
-  id varchar,
-  condition  text,
   forecast_on date,
   predicted_at timestamp,
-  preticipation_percent float,
-  city varchar,
-  PRIMARY KEY (id, city)
-);
+  temperature float,
+  city_name varchar,
+  version int,
+  PRIMARY KEY ((version, city_name), forecast_on)
+) WITH CLUSTERING ORDER BY (forecast_on DESC);

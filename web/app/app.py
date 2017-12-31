@@ -1,4 +1,5 @@
 import os
+import sys
 import datetime
 from flask import Flask, jsonify, redirect, url_for, Response, send_file
 from cassandra.cluster import Cluster
@@ -6,13 +7,15 @@ from cassandra.query import ordered_dict_factory, dict_factory
 from kafka import KafkaProducer
 import json
 import logging
+sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared'))
+
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-KEYSPACE_NAME = "weather_forecast"
-TABLE_NAME = "prediction"
-BOOTSTRAP_SERVER = "172.17.0.1"
-TOPIC_NAME = "batch_data"
+# KEYSPACE_NAME = "weather_forecast"
+# TABLE_NAME = "prediction"
+# BOOTSTRAP_SERVER = "172.17.0.1"
+# TOPIC_NAME = "batch_data"
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -48,7 +51,7 @@ def predictions_index():
 
     sql = """
         SELECT city, condition, prediction_percent, rain_3h, snow_3h
-        FROM prediction
+        FROM %s
         --WHERE city = 'san francisco'
         --WHERE city = %s
         -- AND predicted_at > %s
@@ -58,7 +61,7 @@ def predictions_index():
     #today_timestamp = int(float(datetime.date.today().strftime("%s.%f"))) * 1000
 
     city = 'san francisco'
-    forecast_data = session.execute(sql)
+    forecast_data = session.execute(sql, (PREDICTION_TABLE_NAME))
 
     forecast = list(forecast_data)
     return jsonify(predictions=forecast)
@@ -68,7 +71,7 @@ def predictions_create():
     logging.critical("predictions create called!!")
     try:
         kafka = KafkaProducer(bootstrap_servers=[BOOTSTRAP_SERVER])
-        kafka.send(TOPIC_NAME, b'bulk_processing')
+        kafka.send(BATCH_DATA_TOPIC_NAME, b'bulk_processing')
         logging.info("send bulk_processing event!!")
         return Response(status=201, mimetype='application/json')
     except Exception as error:
