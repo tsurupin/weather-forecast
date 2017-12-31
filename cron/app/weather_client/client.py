@@ -57,9 +57,7 @@ class WeatherClient(object):
                 msg =  json.dumps(transformed_record).encode("utf-8")
                 logging.critical(msg)
                 logging.critical("transformed_record")
-                self._producer.send(STREAMING_DATA_TOPIC_NAME, msg)
 
-                #producer =  KafkaProducer(bootstrap_servers=[BOOTSTRAP_SERVER])
                 self._producer.send(STREAMING_DATA_TOPIC_NAME, msg)
                 self.last_lookup_at[city_id] = transformed_record['dt']
                 logging.info("send_record city_id:{} time:#{}".format(city_id, transformed_record['dt']))

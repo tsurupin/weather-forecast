@@ -17,15 +17,12 @@ from forecast import Forecast
 class Batch(object):
 
     def run(self):
-        while True:
-            self._predict_weather()
-            sleep(300)
-        #sleep(30)
+        sleep(30)
 
-        # consumer = self._load_kafka_consumer()
-        # self._consume_message(consumer)
-        # logging.critical("consumer gets close")
-        # consumer.close()
+        consumer = self._load_kafka_consumer()
+        self._consume_message(consumer)
+        logging.critical("consumer gets close")
+        consumer.close()
 
     def _consume_message(self, consumer):
         for msg in consumer:

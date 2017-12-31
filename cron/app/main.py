@@ -19,7 +19,6 @@ def fetch_weather_data():
 
 def main():
     sleep(30)
-    #fetch_weather_data()
 
     logging.basicConfig(
         level=logging.INFO,

@@ -42,16 +42,9 @@ class Streaming(object):
 
     def _consume_message(self, consumer):
         for msg in consumer:
-            logging.critical("finaoyy got message-!!!!!!!!!!!!!!")
-            logging.critical(msg)
-            logging.critical(msg.value)
-
-            logging.critical('streaming_data: {}'.format(msg))
-
             self._save(msg.value)
-
             self._predict_weather()
-            logging.critical("load_data-------------")
+
 
     def _save(self, data):
 
