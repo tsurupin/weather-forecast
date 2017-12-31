@@ -60,15 +60,15 @@ cassandra:
  volumes:
    - ./data/cassandra:/var/lib/cassandra
 
-# streaming:
-#   build: ./streaming
-#   volumes:
-#     - ./shared:/app/shared
-#     - ./streaming/streaming.py:/app/streaming.py
-#   links:
-#     - cassandra
-#   #  - kafka
-#   command: python app/streaming.py
+streaming:
+  build: ./streaming
+  volumes:
+    - ./shared:/app/shared
+    - ./streaming/streaming.py:/app/streaming.py
+  links:
+    - cassandra
+  # #  - kafka
+  command: python app/streaming.py
 
 # spark_batch:
 #   image: jupyter/pyspark-notebook

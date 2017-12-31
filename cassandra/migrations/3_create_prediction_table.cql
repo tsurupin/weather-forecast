@@ -5,6 +5,6 @@ CREATE TABLE IF NOT EXISTS weather_forecast.prediction
   forecast_on date,
   predicted_at timestamp,
   preticipation_percent float,
-  city varchar,
-  PRIMARY KEY (id, city)
+  city_name varchar,
+  PRIMARY KEY ((id, city_name), predicted_at)
 );

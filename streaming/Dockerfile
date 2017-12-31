@@ -1,4 +1,4 @@
-FROM python:3.5.0-slim
+FROM python:latest
 
 MAINTAINER TOMOAKI TSURUTA
 

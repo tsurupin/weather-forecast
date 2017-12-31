@@ -1,5 +1,4 @@
 from kafka import KafkaProducer
-#from .settings import BOOTSTRAP_SERVER, TOPIC_NAME
 import logging
 import sys
 import os
@@ -7,7 +6,6 @@ import requests
 import json
 from datetime import datetime
 from weather_client.transformer import Transformer
-#logging.basicConfig(level=logging.DEBUG)
 
 import logging
 logging.basicConfig(level=logging.DEBUG)

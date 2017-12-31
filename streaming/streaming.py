@@ -17,21 +17,22 @@ import logging
 import datetime
 import json
 from cassandra.cluster import Cluster
-from cassandra.query import ordered_dict_factory, dict_factory
+from cassandra.query import ordered_dict_factory
 from kafka import KafkaConsumer
-#from forecast import Forecast
+
 from time import sleep
 import logging
 #logging.basicConfig(level=logging.DEBUG)
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared'))
-
 from config import *
+sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/shared/predictions'))
+from forecast import Forecast
 
 WAIT_TIME_IN_SECOND = 60
 class Streaming(object):
 
     def run(self):
-        sleep(30)
+        #sleep(30)
         #
         # consumer = KafkaConsumer(
         #     STREAMING_DATA_TOPIC_NAME,
@@ -50,37 +51,26 @@ class Streaming(object):
             #     logging.info('streaming_data: {}'.format(msg))
             #     need_prediction = True
 
-            data = {'pressure': 1014, 'sunset': 1514626582, 'city_id': 5391959, 'temperature': 298.15, 'dt': 1514635200, 'country_code': 'PH', 'condition_id': 803, 'longitude': 120.83, 'clouds_all': 75, 'condition': 'Clouds', 'sunrise': 1514586145, 'condition_details': 'broken clouds', 'latitude': 15.35, 'temperature_max': 298.15, 'wind_degree': 50, 'wind_speed': 2.1, 'humidity': 69, 'temperature_min': 298.15, 'city_name': 'San Francisco'}
-            self._save(data)
-            # if need_prediction:
-            #
-            #     #self._predict_weather()
+            #data = {'pressure': 1014, 'sunset': 1514626582, 'city_id': 5391959, 'temperature': 298.15, 'dt': 1514635200, 'country_code': 'PH', 'condition_id': 803, 'longitude': 120.83, 'clouds_all': 75, 'condition': 'Clouds', 'sunrise': 1514586145, 'condition_details': 'broken clouds', 'latitude': 15.35, 'temperature_max': 298.15, 'wind_degree': 50, 'wind_speed': 2.1, 'humidity': 69, 'temperature_min': 298.15, 'city_name': 'San Francisco'}
+            #self._save(data)
+            #if need_prediction:
+
+            self._predict_weather()
             logging.info("load_data-------------")
             sleep(WAIT_TIME_IN_SECOND)
 
         #consumer.close()
 
     def _save(self, data):
-        cluster = Cluster([os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost')],
-                          port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
-                          )
-        session = None
-        logging.critical("before session")
-        while session is None:
-            try:
-                session = cluster.connect(KEYSPACE_NAME)
-            except Exception as e:
-                logging.error(e)
-                sleep(5)
-        logging.critical("session------")
-        logging.critical(session)
-        session.row_factory = dict_factory
-        # need to think about uuid
+
+        session = self._load_data_from_cassandra()
+
+        session.row_factory = ordered_dict_factory
         unix_datetime = None if data.get('dt') is None else datetime.datetime.fromtimestamp(data.get('dt'))
         session.execute('''
-        INSERT INTO raw_data (id, dt, dt_iso, measured_at, clouds_all, condition_id, condition_details, condition, city_name, city_id, temperature, temperature_max, temperature_min, rain_3h, snow_3h, wind_speed, wind_degree, humidity, pressure)
+        INSERT INTO {} (id, dt, dt_iso, measured_at, clouds_all, condition_id, condition_details, condition, city_name, city_id, temperature, temperature_max, temperature_min, rain_3h, snow_3h, wind_speed, wind_degree, humidity, pressure)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ''', (
+        '''.format(RAW_DATA_TABLE_NAME), (
                 str(uuid.uuid4()),
                 data.get('dt'),
                 unix_datetime,
@@ -107,10 +97,25 @@ class Streaming(object):
     def _predict_weather(self):
         from forecast import Forecast
         forecast = Forecast(type="streaming")
+        forecast.preprocess()
         forecast.fit()
         prediction = forecast.predict()
-        print('result: {}'.format(prediction))
+        logging.critical('result: {}'.format(prediction))
         forecast.save()
+
+    def _load_cassandra_session(self):
+        while session is None:
+            try:
+                cluster = Cluster([os.environ.get('CASSANDRA_PORT_9042_TCP_ADDR', 'localhost')],
+                                  port=int(os.environ.get('CASSANDRA_PORT_9042_TCP_PORT', 9042))
+                                  )
+                session = cluster.connect(KEYSPACE_NAME)
+                return session
+            except Exception as e:
+                logging.error(e)
+                sleep(5)
+
+
 
 
 

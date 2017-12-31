@@ -19,5 +19,5 @@ CREATE TABLE IF NOT EXISTS weather_forecast.raw_data
   condition  text,
   condition_details text,
   measured_at timestamp,
-  PRIMARY KEY (id, city_id)
-);
+  PRIMARY KEY (city_name, dt)
+) WITH CLUSTERING ORDER BY (dt ASC);

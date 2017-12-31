@@ -1,12 +1,12 @@
 import numpy as np
 import pandas as pd
 import datetime
+import logging
 from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import FeatureUnion
-
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
 
@@ -18,12 +18,13 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
         return X[self.attribute_names].values
 
 class FeatureTransformer(object):
-    def __init__(slef, data):
+    def __init__(self, data):
         self.data = data
+        logging.critical(data)
 
     def perform(self):
-        unused_columns = unused_columns = ['snow_1h', 'snow_24h', 'rain_24h', 'rain_1h', 'snow_3h', 'rain_today', 'snow_today', 'weather_icon', 'weather_id', 'sea_level', 'grnd_level', 'lat', 'lon', 'city_id', 'city_name']
-        used_columns = set(self.x.columns) - set(unused_columns)
+        unused_columns = ['snow_1h', 'snow_24h', 'rain_24h', 'rain_1h', 'snow_3h', 'rain_today', 'snow_today', 'weather_icon', 'weather_id', 'sea_level', 'grnd_level', 'lat', 'lon', 'city_id', 'city_name']
+        used_columns = set(self.data.columns) - set(unused_columns)
         self.hour_diffs =  [1,2,3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48]
         self.weather_description_columns = [
             'light intensity drizzle',
