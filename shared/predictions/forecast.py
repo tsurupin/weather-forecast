@@ -41,7 +41,7 @@ class Forecast(object):
         original_data = self._load_data_from_cassandra()
 
         feature_transformer = FeatureTransformer(data=original_data)
-        self.x, self.y, self.target_x = feature_transformer.perform()
+        self.x, self.y, self.target_x, self.forecast_at = feature_transformer.perform()
         logging.critical('x={}, y={}, target_x={}'.format(self.x, self.y, self.target_x))
 
     def fit(self):
@@ -52,15 +52,16 @@ class Forecast(object):
 
     def predict(self):
         if self.target_x is not None:
-            self.prediction_result = self.model.predict(self.target_x)
+            self.prediction_result = self.model.predict(self.target_x)[0]
             logging.critical('predict: {}'.format(self.prediction_result))
 
     def save(self):
         if self.prediction_result is not None:
+            latest_version = self._latest_version()
             self.session.execute('''
-            INSERT INTO {} (city_name, version, predicted_at, forecast_on)
-            VALUES (%s, %s, %s, %s)
-            '''.format(PREDICTION_TABLE_NAME), (SAN_FRANCISCO_CITY_NAME, datetime.now(), ))
+            INSERT INTO {} (temperature, city_name, version, predicted_at, forecast_at)
+            VALUES (%s, %s, %s, %s, %s)
+            '''.format(PREDICTION_TABLE_NAME), (self.prediction_result, SAN_FRANCISCO_CITY_NAME, latest_version, datetime.now(), datetime.utcfromtimestamp(self.forecast_at)))
 
     def _load_data_from_cassandra(self):
         self.session = self._load_cassandra_session()
@@ -87,6 +88,14 @@ class Forecast(object):
 
     def _pandas_factory(self,colnames, rows):
         return pd.DataFrame(rows, columns=colnames)
+
+    def _latest_version(self):
+        rows = self.session.execute('SELECT DISTINCT version, city_name FROM {}'.format(PREDICTION_TABLE_NAME))
+        version_list = list(rows._current_rows['version'])
+        latest_version = max(version_list) if any(version_list) else 1
+        if self.type == 'batch':
+            latest_version += 1
+        return latest_version
 
     # def _save(self, rdd):
     #     if rdd.count() > 0:

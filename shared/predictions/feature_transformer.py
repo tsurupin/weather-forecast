@@ -86,8 +86,9 @@ class FeatureTransformer(object):
         self.data = self.data.drop(['target_temperature'], axis=1)
         self.data = self._transform_with_pipelines(self.data)
         test_data = test_data.drop(['target_temperature'], axis=1)
+        forecast_at = list(test_data.dt)[-1]
         test_data = self._transform_with_pipelines(test_data)
-        return self.data, target_data, test_data
+        return self.data, target_data, test_data, forecast_at
 
 
     def _cleanup_features(self, original_data, columns):
